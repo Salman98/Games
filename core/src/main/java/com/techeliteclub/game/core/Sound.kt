@@ -92,11 +92,13 @@ class GameSettings(private val store: GameStore) {
     var sound by mutableStateOf(store.getBool("sound", true)); private set
     var music by mutableStateOf(store.getBool("music", true)); private set
     var vibration by mutableStateOf(store.getBool("vibration", true)); private set
+    var reminders by mutableStateOf(store.getBool("reminders", true)); private set
 
     // Not named setSound: that would clash with the property's own setter.
     fun switchSound(on: Boolean) { sound = on; store.putBool("sound", on) }
     fun switchMusic(on: Boolean) { music = on; store.putBool("music", on) }
     fun switchVibration(on: Boolean) { vibration = on; store.putBool("vibration", on) }
+    fun switchReminders(on: Boolean) { reminders = on; store.putBool("reminders", on) }
 }
 
 val LocalSounds = staticCompositionLocalOf<Sounds?> { null }

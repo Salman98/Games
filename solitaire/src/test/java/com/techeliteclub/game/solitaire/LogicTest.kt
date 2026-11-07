@@ -71,4 +71,14 @@ class LogicTest {
         assertTrue(canAutoFinish(b))
         assertTrue(isWon(autoFinish(b)))
     }
+
+    @Test
+    fun saveAndLoadRoundTrip() {
+        var b = deal(Random(9))
+        repeat(5) { b = draw(b) }
+        assertEquals(b, decodeBoard(encodeBoard(b)))
+        val empty = Board(emptyList(), emptyList(), List(4) { emptyList() }, List(7) { emptyList() })
+        assertEquals(null, decodeBoard(encodeBoard(empty))) // not a full deck
+        assertEquals(null, decodeBoard("x"))
+    }
 }

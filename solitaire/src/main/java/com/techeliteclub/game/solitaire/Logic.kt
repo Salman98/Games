@@ -107,3 +107,24 @@ fun autoFinish(start: Board): Board {
     }
     return b
 }
+
+private fun encodePile(p: List<Card>) = p.joinToString(" ") { "${it.rank}.${it.suit}.${if (it.up) 1 else 0}" }
+
+private fun decodePile(s: String): List<Card> =
+    if (s.isEmpty()) emptyList() else s.split(" ").map { c -> c.split(".").let { Card(it[0].toInt(), it[1].toInt(), it[2] == "1") } }
+
+/** Saved deal as text: stock # waste # 4 foundations | … # 7 tableau piles | … */
+fun encodeBoard(b: Board): String = listOf(
+    encodePile(b.stock), encodePile(b.waste),
+    b.foundations.joinToString("|") { encodePile(it) }, b.tableau.joinToString("|") { encodePile(it) },
+).joinToString("#")
+
+/** Null when missing or damaged (then a new deal starts). Checks it is still a full, valid deck. */
+fun decodeBoard(text: String?): Board? = runCatching {
+    val (stock, waste, f, t) = text!!.split("#")
+    val b = Board(decodePile(stock), decodePile(waste), f.split("|").map(::decodePile), t.split("|").map(::decodePile))
+    require(b.foundations.size == 4 && b.tableau.size == 7)
+    val all = b.stock + b.waste + b.foundations.flatten() + b.tableau.flatten()
+    require(all.map { it.rank to it.suit }.toSet().size == 52 && all.size == 52)
+    b
+}.getOrNull()

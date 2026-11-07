@@ -45,4 +45,17 @@ class LogicTest {
         assertTrue(fitsAnywhere(full, dot))
         assertFalse(fitsAnywhere(full, Piece(parseShape("XX"), 1)))
     }
+
+    @Test
+    fun saveAndLoadRoundTrip() {
+        val b = place(IntArray(SIZE * SIZE), Piece(parseShape("XX|X."), 3), 2, 2).board
+        val pieces = listOf(Piece(parseShape("XXX"), 1), null, Piece(parseShape("X|X"), 5))
+        val saved = decodeGame(encodeGame(b, pieces, 77))!!
+        assertTrue(b.contentEquals(saved.board))
+        assertEquals(pieces, saved.pieces)
+        assertEquals(77, saved.score)
+        assertEquals(null, decodeGame("garbage"))
+        assertEquals(null, decodeGame(null))
+    }
 }
+

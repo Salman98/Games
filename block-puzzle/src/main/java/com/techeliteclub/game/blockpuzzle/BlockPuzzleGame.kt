@@ -68,13 +68,15 @@ fun BlockPuzzleGame(ads: Ads) {
     val feedback = rememberFeedback()
     val density = LocalDensity.current
     val rng = remember { Random(System.nanoTime()) }
-    var board by remember { mutableStateOf(IntArray(SIZE * SIZE)) }
-    var pieces by remember { mutableStateOf<List<Piece?>>(randomPieces(rng)) }
+    // Resume the game from last time (it is saved after every move).
+    val saved = remember { decodeGame(store.getString("save")) }
+    var board by remember { mutableStateOf(saved?.board ?: IntArray(SIZE * SIZE)) }
+    var pieces by remember { mutableStateOf(saved?.pieces ?: randomPieces(rng)) }
     var selected by remember { mutableStateOf<Int?>(null) }
-    var score by remember { mutableIntStateOf(0) }
+    var score by remember { mutableIntStateOf(saved?.score ?: 0) }
     var best by remember { mutableIntStateOf(store.get("best")) }
     // Saved game counter: each new game (and each app launch) gets its own free hint.
-    var gameNo by remember { mutableIntStateOf((store.get("game_no") + 1).also { store.put("game_no", it) }) }
+    var gameNo by remember { mutableIntStateOf(if (saved != null) store.get("game_no") else (store.get("game_no") + 1).also { store.put("game_no", it) }) }
     var undo by remember { mutableStateOf<Snapshot?>(null) }
     var flash by remember { mutableStateOf(setOf<Int>()) }
     var popup by remember { mutableStateOf<Pair<String, String>?>(null) }
@@ -91,6 +93,7 @@ fun BlockPuzzleGame(ads: Ads) {
 
     val gameOver = pieces.filterNotNull().none { fitsAnywhere(board, it) }
 
+    LaunchedEffect(board, pieces, score) { store.putString("save", encodeGame(board, pieces, score)) }
     LaunchedEffect(flash) { if (flash.isNotEmpty()) { delay(300); flash = emptySet() } }
     LaunchedEffect(popupId) { if (popup != null) { delay(900); popup = null } }
 

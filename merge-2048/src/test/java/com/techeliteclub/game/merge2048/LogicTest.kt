@@ -31,4 +31,13 @@ class LogicTest {
         assertFalse(slide(row(2, 4, 8, 16), Dir.LEFT).moved)
         assertTrue(newBoard(Random(1)).count { it != 0 } == 2)
     }
+
+    @Test
+    fun saveAndLoadRoundTrip() {
+        val b = newBoard(Random(4))
+        val (b2, s2) = decodeGame(encodeGame(b, 120))!!
+        assertTrue(b.contentEquals(b2))
+        assertEquals(120, s2)
+        assertEquals(null, decodeGame("1,2;3"))
+    }
 }

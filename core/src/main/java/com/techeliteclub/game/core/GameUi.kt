@@ -1,11 +1,14 @@
 package com.techeliteclub.game.core
 
+import android.Manifest
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,6 +75,7 @@ abstract class GameActivity : ComponentActivity() {
     @Composable
     abstract fun Game(ads: Ads)
 
+    private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
     private lateinit var sounds: Sounds
     private lateinit var haptics: Haptics
     private var music: Music? = null
@@ -82,6 +86,14 @@ abstract class GameActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val store = GameStore(this)
         settings = GameSettings(store)
+        // Ask for reminder notifications on the second launch (not the first), once.
+        val launches = store.get("launches") + 1
+        store.put("launches", launches)
+        if (Build.VERSION.SDK_INT >= 33 && launches >= 2 && !store.getBool("asked_notifications", false)) {
+            store.putBool("asked_notifications", true)
+            askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        Reminder.schedule(this)
         sounds = Sounds(this)
         haptics = Haptics(this)
         music = Music(this)
@@ -99,6 +111,7 @@ abstract class GameActivity : ComponentActivity() {
                     var screen by rememberSaveable { mutableStateOf("home") }
                     var showSettings by remember { mutableStateOf(false) }
                     val nav = remember { GameNav(home = { screen = "home" }, settings = { showSettings = true }) }
+                    LaunchedEffect(screen) { if (screen == "play") Reminder.markPlayed(store) }
                     LaunchedEffect(settings.music) { if (settings.music) music?.start() else music?.pause() }
                     BackHandler(enabled = screen != "home" || showSettings) {
                         if (showSettings) showSettings = false else screen = "home"
@@ -268,6 +281,10 @@ class GameStore(context: Context) {
     fun put(key: String, value: Int) = prefs.edit().putInt(key, value).apply()
     fun getBool(key: String, default: Boolean) = prefs.getBoolean(key, default)
     fun putBool(key: String, value: Boolean) = prefs.edit().putBoolean(key, value).apply()
+    fun getString(key: String): String? = prefs.getString(key, null)
+    fun putString(key: String, value: String) = prefs.edit().putString(key, value).apply()
+    fun getLong(key: String, default: Long = 0L) = prefs.getLong(key, default)
+    fun putLong(key: String, value: Long) = prefs.edit().putLong(key, value).apply()
 }
 
 @Composable

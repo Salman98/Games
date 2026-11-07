@@ -144,6 +144,8 @@ fun ResultDialog(
 ) {
     val t = LocalGameTheme.current
     val feedback = rememberFeedback()
+    val store = rememberStore()
+    val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
     val appear = remember { Animatable(0f) }
     val ribbon = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
@@ -232,7 +234,11 @@ fun ResultDialog(
             val pulse by rememberInfiniteTransition(label = "pulse").animateFloat(
                 1f, 1.05f, infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "scale",
             )
-            PrimaryButton(button, Modifier.padding(top = 28.dp).width(280.dp).scale(if (win) pulse else 1f), height = 74.dp, fontSize = 30.sp, onClick = onClick)
+            PrimaryButton(button, Modifier.padding(top = 28.dp).width(280.dp).scale(if (win) pulse else 1f), height = 74.dp, fontSize = 30.sp) {
+                // Happy players are asked for a rating (Google shows it at most occasionally).
+                if (win && stars >= 3 && activity != null) RateApp.onGreatWin(activity, store)
+                onClick()
+            }
             if (secondButton != null) {
                 Box(Modifier.padding(top = 16.dp)) {
                     GlassPill(Modifier.pressable(onClick = onSecond)) {
@@ -396,6 +402,7 @@ fun SettingsSheet(ads: Ads, settings: GameSettings, onClose: () -> Unit) {
             SettingRow(GameIcons.Sound, "Sound effects", settings.sound) { settings.switchSound(it) }
             SettingRow(GameIcons.Music, "Music", settings.music) { settings.switchMusic(it) }
             SettingRow(GameIcons.Vibrate, "Vibration", settings.vibration) { settings.switchVibration(it) }
+            SettingRow(GameIcons.Bell, "Daily reminder", settings.reminders) { settings.switchReminders(it) }
             if (ads.privacyOptionsRequired) {
                 GlassPill(Modifier.pressable { ads.showPrivacyOptions() }) { PillText("Privacy options") }
             }
