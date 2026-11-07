@@ -109,10 +109,10 @@ fun HomeScreen(
             Row(Modifier.padding(top = 22.dp, bottom = 26.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                 if (settings != null) {
                     GlassIconButton(if (settings.sound) GameIcons.Sound else GameIcons.SoundOff, if (settings.sound) "Sound on" else "Sound off", 54.dp) {
-                        settings.setSound(!settings.sound); feedback.tap()
+                        settings.switchSound(!settings.sound); feedback.tap()
                     }
                     GlassIconButton(if (settings.music) GameIcons.Music else GameIcons.MusicOff, if (settings.music) "Music on" else "Music off", 54.dp) {
-                        settings.setMusic(!settings.music); feedback.tap()
+                        settings.switchMusic(!settings.music); feedback.tap()
                     }
                 }
                 if (onHowTo != null) GlassIconButton(GameIcons.Help, "How to play", 54.dp) { feedback.tap(); onHowTo() }
@@ -276,9 +276,9 @@ fun SettingsSheet(ads: Ads, settings: GameSettings, onClose: () -> Unit) {
                 GradientText("SETTINGS", t.logo1, 28.sp)
                 GlassIconButton(GameIcons.Close, "Close", 40.dp, onClose)
             }
-            SettingRow(GameIcons.Sound, "Sound effects", settings.sound) { settings.setSound(it) }
-            SettingRow(GameIcons.Music, "Music", settings.music) { settings.setMusic(it) }
-            SettingRow(GameIcons.Vibrate, "Vibration", settings.vibration) { settings.setVibration(it) }
+            SettingRow(GameIcons.Sound, "Sound effects", settings.sound) { settings.switchSound(it) }
+            SettingRow(GameIcons.Music, "Music", settings.music) { settings.switchMusic(it) }
+            SettingRow(GameIcons.Vibrate, "Vibration", settings.vibration) { settings.switchVibration(it) }
             if (ads.privacyOptionsRequired) {
                 GlassPill(Modifier.pressable { ads.showPrivacyOptions() }) { PillText("Privacy options") }
             }
