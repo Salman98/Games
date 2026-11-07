@@ -104,3 +104,7 @@ Play also needs an account-deletion link in the Data safety form (in-app: Settin
 3. Replace the placeholder icon (`core/src/main/res/drawable/ic_launcher_fg.xml`) and colour (`<game>/src/main/res/values/game.xml`).
 4. Release signing key (Android Studio → Build → Generate Signed Bundle).
 5. Play Console: privacy policy URL, Data safety form (AdMob collects device ids), target audience 13+, content rating.
+
+## Launch checklist
+
+Accounts, IDs, store and privacy steps: see [TODO.md](TODO.md). Privacy page and `app-ads.txt` to upload: [`website/`](website/).
