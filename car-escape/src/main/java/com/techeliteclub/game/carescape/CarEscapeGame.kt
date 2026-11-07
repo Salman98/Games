@@ -5,16 +5,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -25,21 +22,63 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.Bezel
+import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
-import com.techeliteclub.game.core.PALETTE
+import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.ResultDialog
+import com.techeliteclub.game.core.Tool
 import com.techeliteclub.game.core.rememberFeedback
 import com.techeliteclub.game.core.rememberStore
 import kotlin.math.roundToInt
 import kotlin.random.Random
+
+private val CAR_COLORS = listOf(
+    Color(0xFF33D6FF), Color(0xFF9B5CFF), Color(0xFFFFC233), Color(0xFF2EE59D), Color(0xFFFF8A3D),
+    Color(0xFF4F8DFF), Color(0xFFC86BFF), Color(0xFF2FD0C0), Color(0xFFB0BEC5),
+)
+private val RED_CAR = Color(0xFFFF2D55)
+private val NEON = Color(0xFF2EE59D)
+
+/** A glossy car body with windows and headlights. Index 0 is the red hero car. */
+@Composable
+fun CarBody(color: Color, horizontal: Boolean, w: Dp, h: Dp, hero: Boolean, modifier: Modifier = Modifier) {
+    val shape = RoundedCornerShape(14.dp)
+    Box(
+        modifier.size(w, h)
+            .shadow(if (hero) 16.dp else 8.dp, shape, ambientColor = if (hero) RED_CAR else Color.Black, spotColor = if (hero) RED_CAR else Color.Black)
+            .background(color, shape)
+            .background(Brush.linearGradient(listOf(Color.White.copy(alpha = 0.5f), Color.Transparent), end = Offset(160f, 160f)), shape)
+            .then(if (hero) Modifier.border(3.dp, Color.White, shape) else Modifier)
+            .drawBehind {
+                val glass = Brush.verticalGradient(listOf(Color(0xFF0B1030), Color(0xFF2A3870)))
+                val m = minOf(size.width, size.height)
+                val r = CornerRadius(5.dp.toPx())
+                if (horizontal) {
+                    drawRoundRect(glass, Offset(size.width * 0.14f, m * 0.18f), Size(m * 0.3f, m * 0.64f), r)
+                    drawRoundRect(glass, Offset(size.width - m * 0.62f, m * 0.18f), Size(m * 0.26f, m * 0.64f), r)
+                    for (y in listOf(0.2f, 0.66f)) drawRoundRect(Color(0xFFFFF6C4), Offset(size.width - 6.dp.toPx(), m * y), Size(4.dp.toPx(), m * 0.14f), r)
+                } else {
+                    drawRoundRect(glass, Offset(m * 0.18f, size.height * 0.12f), Size(m * 0.64f, m * 0.3f), r)
+                    drawRoundRect(glass, Offset(m * 0.18f, size.height - m * 0.56f), Size(m * 0.64f, m * 0.26f), r)
+                }
+            }
+    )
+}
 
 @Composable
 fun CarEscapeGame(ads: Ads) {
@@ -49,74 +88,78 @@ fun CarEscapeGame(ads: Ads) {
     val start = remember(level) { newLevel(level, Random(level.toLong())) }
     val par = remember(start) { solve(start)?.size ?: 0 } // fewest moves possible
     var cars by remember(level) { mutableStateOf(start) }
-    var moves by remember(level) { mutableIntStateOf(0) }
+    var history by remember(level) { mutableStateOf(listOf<List<Car>>()) }
+    val moves = history.size
     val won = isSolved(cars)
 
     fun play(m: Move) {
         if (m.delta == 0) return
+        history = history + listOf(cars)
         cars = move(cars, m)
-        moves++
-        if (isSolved(cars)) feedback.win() else feedback.tap()
+        if (!isSolved(cars)) feedback.good()
     }
 
-    GameScaffold("Car Escape", "Level $level · Moves $moves · Par $par", ads, { cars = start; moves = 0 }, "Next move",
-        onHint = { solve(cars)?.firstOrNull()?.let(::play) }) {
-        Text("Slide the cars so the red car can drive out on the right.", style = MaterialTheme.typography.bodySmall)
-        Spacer(Modifier.height(12.dp))
-        BoxWithConstraints(
-            Modifier.fillMaxWidth().aspectRatio(1f)
-                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-        ) {
-            val cell = maxWidth / N
-            val cellPx = with(LocalDensity.current) { cell.toPx() }
-            // Exit gap on the right edge of the exit row.
-            Box(Modifier.offset(maxWidth - 4.dp, cell * EXIT_ROW).size(4.dp, cell).background(Color(0xFF43A047)))
-            cars.forEachIndexed { i, car ->
-                CarView(i, car, cell, cellPx, slideRange(cars, i)) { delta -> play(Move(i, delta)) }
+    GameScaffold(
+        ads, "CAR ESCAPE",
+        pills = listOf(Pill("LEVEL $level"), Pill("MOVES $moves"), Pill("PAR $par", GameIcons.StarGold, gold = true)),
+        tools = listOf(
+            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { cars = history.last(); history = history.dropLast(1) },
+            Tool("Restart", GameIcons.Restart) { cars = start; history = emptyList() },
+        ),
+        hint = Hint("Next move", GameIcons.Bulb, levelKey = level) { solve(cars)?.firstOrNull()?.let(::play) },
+    ) {
+        Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 10.dp) {
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val cell = maxWidth / N
+                val cellPx = with(LocalDensity.current) { cell.toPx() }
+                // Faint parking-bay lines.
+                Box(
+                    Modifier.fillMaxSize().drawBehind {
+                        val step = size.width / N
+                        for (k in 1 until N) {
+                            drawLine(Color(0x1F78C8FF), Offset(k * step, 0f), Offset(k * step, size.height), 1f)
+                            drawLine(Color(0x1F78C8FF), Offset(0f, k * step), Offset(size.width, k * step), 1f)
+                        }
+                    }
+                )
+                // Neon exit gate at the end of the exit row.
+                Box(
+                    Modifier.offset(maxWidth - 5.dp, cell * EXIT_ROW + 6.dp).size(5.dp, cell - 12.dp)
+                        .shadow(10.dp, RoundedCornerShape(3.dp), ambientColor = NEON, spotColor = NEON)
+                        .background(NEON, RoundedCornerShape(3.dp))
+                )
+                cars.forEachIndexed { i, car ->
+                    CarView(i, car, cell, cellPx, slideRange(cars, i)) { delta -> play(Move(i, delta)) }
+                }
             }
         }
     }
 
     if (won) {
         val stars = when { moves <= par -> 3; moves <= par + 3 -> 2; else -> 1 }
-        ResultDialog("Escaped!", "${"★".repeat(stars)}${"☆".repeat(3 - stars)}\nLevel $level in $moves moves (par $par).", "Next level", {
+        ResultDialog("Escaped!", "Level: $level\nMoves: $moves (par $par)", "Next level", {
             ads.levelDone()
+            store.put("stars", store.get("stars") + stars)
             level++
             store.put("level", level)
-        }, emoji = "🚗")
+        }, stars = stars)
     }
 }
 
 @Composable
-private fun CarView(
-    index: Int, car: Car, cell: androidx.compose.ui.unit.Dp, cellPx: Float, range: IntRange, onSlide: (Int) -> Unit,
-) {
+private fun CarView(index: Int, car: Car, cell: Dp, cellPx: Float, range: IntRange, onSlide: (Int) -> Unit) {
     var dragPx by remember(car) { mutableFloatStateOf(0f) }
     val currentRange by rememberUpdatedState(range)
-    val color = if (index == 0) Color(0xFFD32F2F) else PALETTE[1 + index % (PALETTE.size - 1)]
     val shown = dragPx.coerceIn(range.first * cellPx, range.last * cellPx) / cellPx
     val (w, h) = if (car.horizontal) cell * car.len to cell else cell to cell * car.len
-    Box(
+    CarBody(
+        if (index == 0) RED_CAR else CAR_COLORS[index % CAR_COLORS.size], car.horizontal, w - 8.dp, h - 8.dp, hero = index == 0,
         Modifier
             .offset(
-                cell * (car.c + if (car.horizontal) shown else 0f),
-                cell * (car.r + if (car.horizontal) 0f else shown),
+                cell * (car.c + if (car.horizontal) shown else 0f) + 4.dp,
+                cell * (car.r + if (car.horizontal) 0f else shown) + 4.dp,
             )
-            .size(w, h).padding(3.dp)
-            .background(color, RoundedCornerShape(10.dp))
-            .border(if (index == 0) 3.dp else 0.dp, Color.White, RoundedCornerShape(10.dp))
-            .drawBehind {
-                // Two dark windows along the car so it reads as a car and shows its direction.
-                val glass = Color.Black.copy(alpha = 0.35f)
-                val t = minOf(this.size.width, this.size.height)
-                if (car.horizontal) {
-                    drawRoundRect(glass, Offset(t * 0.25f, t * 0.2f), Size(t * 0.35f, t * 0.6f), CornerRadius(6f))
-                    drawRoundRect(glass, Offset(this.size.width - t * 0.6f, t * 0.2f), Size(t * 0.35f, t * 0.6f), CornerRadius(6f))
-                } else {
-                    drawRoundRect(glass, Offset(t * 0.2f, t * 0.25f), Size(t * 0.6f, t * 0.35f), CornerRadius(6f))
-                    drawRoundRect(glass, Offset(t * 0.2f, this.size.height - t * 0.6f), Size(t * 0.6f, t * 0.35f), CornerRadius(6f))
-                }
-            }
+            .semantics { contentDescription = if (index == 0) "Red car" else "Car ${index + 1}" }
             .pointerInput(car) {
                 detectDragGestures(
                     onDragEnd = {
@@ -129,6 +172,11 @@ private fun CarView(
                     change.consume()
                     dragPx += if (car.horizontal) amount.x else amount.y
                 }
-            }
+            },
     )
 }
+
+/** Hero art helper for the home screen. */
+@Composable
+fun HeroCar(horizontal: Boolean, w: Dp, h: Dp, hero: Boolean, modifier: Modifier = Modifier) =
+    CarBody(if (hero) RED_CAR else CAR_COLORS[0], horizontal, w, h, hero, modifier.padding(0.dp))
