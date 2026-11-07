@@ -1,0 +1,200 @@
+{
+  "project_info": {
+    "project_number": "568076141680",
+    "project_id": "techeliteclub-games",
+    "storage_bucket": "techeliteclub-games.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:8b82fad915dd2949a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.arrowescape"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:16c9bc1062cd0263a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.blockpuzzle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:5de0718669da9af2a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.carescape"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:8db2b864a218dcafa6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.colorsort"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:fb395e54788698d2a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.crownlogic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:da82112abec726e8a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.merge2048"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:dcd8462f563c09c5a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.solitaire"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:7c24dd5db488d7faa6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.sudoku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:7c854d635a24fabca6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.tilemahjong"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:568076141680:android:e5034bc30277b719a6e0b5",
+        "android_client_info": {
+          "package_name": "com.techeliteclub.game.wordsearch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHFdt4K7FMngVervSckPeT0xLLN6tWqB0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
