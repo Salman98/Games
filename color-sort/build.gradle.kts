@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.salman98.games.colorsort"
+    namespace = "com.techeliteclub.colorsort"
     defaultConfig {
         applicationId = "com.techeliteclub.colorsort" // cannot change after the first Play upload
         versionCode = 1

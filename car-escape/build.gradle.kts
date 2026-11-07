@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.salman98.games.carescape"
+    namespace = "com.techeliteclub.carescape"
     defaultConfig {
         applicationId = "com.techeliteclub.carescape" // cannot change after the first Play upload
         versionCode = 1

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.salman98.games.crownlogic"
+    namespace = "com.techeliteclub.crownlogic"
     defaultConfig {
         applicationId = "com.techeliteclub.crownlogic" // cannot change after the first Play upload
         versionCode = 1

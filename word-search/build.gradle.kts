@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.salman98.games.wordsearch"
+    namespace = "com.techeliteclub.wordsearch"
     defaultConfig {
         applicationId = "com.techeliteclub.wordsearch" // cannot change after the first Play upload
         versionCode = 1

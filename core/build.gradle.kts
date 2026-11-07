@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-android { namespace = "com.salman98.games.core" }
+android { namespace = "com.techeliteclub.core" }
 
 dependencies {
     api(platform(libs.compose.bom))

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.salman98.games.merge2048"
+    namespace = "com.techeliteclub.merge2048"
     defaultConfig {
         applicationId = "com.techeliteclub.merge2048" // cannot change after the first Play upload
         versionCode = 1
