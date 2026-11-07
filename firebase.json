@@ -1,0 +1,13 @@
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "TechEliteClub Games",
+        "supportEmail": "memonsalman800@gmail.com"
+      }
+    }
+  }
+}

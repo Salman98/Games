@@ -8,11 +8,15 @@ plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.google.services) apply false
 }
 
 // Settings shared by every game, so each game's build.gradle.kts only names itself.
 subprojects {
     plugins.withId("com.android.application") {
+        // Firebase (Google Sign-In + Firestore) turns on per game once its google-services.json is added.
+        // Games without one still build; the sign-in row just stays hidden.
+        if (file("google-services.json").exists()) apply(plugin = "com.google.gms.google-services")
         extensions.configure<ApplicationExtension> {
             compileSdk = 36
             defaultConfig {

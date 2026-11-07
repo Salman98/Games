@@ -1,5 +1,14 @@
 package com.techeliteclub.game.core
 
+import android.app.Activity
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -436,8 +445,62 @@ fun SettingsSheet(ads: Ads, settings: GameSettings, onClose: () -> Unit) {
             if (ads.privacyOptionsRequired) {
                 GlassPill(Modifier.pressable { ads.showPrivacyOptions() }) { PillText("Privacy options") }
             }
+            AccountRow()
         }
     }
+}
+
+/** Google sign-in for cloud save. Hidden until the game has its google-services.json. */
+@Composable
+private fun AccountRow() {
+    val context = LocalContext.current
+    if (!Cloud.available(context)) return
+    val activity = context as Activity
+    val t = LocalGameTheme.current
+    val store = rememberStore()
+    val scope = rememberCoroutineScope()
+    var user by remember { mutableStateOf(Cloud.user) }
+    var busy by remember { mutableStateOf(false) }
+    var note by remember { mutableStateOf<String?>(null) }
+    var confirmDelete by remember { mutableStateOf(false) }
+    fun act(block: suspend () -> Unit) {
+        if (busy) return
+        busy = true
+        note = null
+        scope.launch {
+            try {
+                block()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: GetCredentialCancellationException) {
+                // user closed the account picker
+            } catch (e: NoCredentialException) {
+                note = "Add a Google account to this device first."
+            } catch (e: FirebaseAuthRecentLoginRequiredException) {
+                note = "Sign out, sign in again, then delete."
+            } catch (e: Exception) {
+                note = e.message ?: "Something went wrong. Try again."
+            } finally {
+                busy = false
+                user = Cloud.user
+            }
+        }
+    }
+    val u = user
+    if (u == null) {
+        GlassPill(Modifier.pressable(enabled = !busy, label = "Sign in with Google") {
+            act { Cloud.signIn(activity, store); activity.recreate() } // recreate shows the restored progress
+        }) { PillText(if (busy) "Signing in…" else "Sign in with Google to save progress") }
+    } else {
+        Text("Signed in as ${u.email ?: u.displayName ?: "Google user"}", color = t.glassInk, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            GlassPill(Modifier.pressable(enabled = !busy, label = "Sign out") { act { Cloud.signOut(context) } }) { PillText("Sign out") }
+            GlassPill(Modifier.pressable(enabled = !busy, label = "Delete account") {
+                if (confirmDelete) act { Cloud.deleteAccount(context) } else { confirmDelete = true }
+            }) { PillText(if (confirmDelete) "Tap again to delete" else "Delete account", Color(0xFFFF8A8A)) }
+        }
+    }
+    note?.let { Text(it, color = Color(0xFFFF8A8A), fontSize = 13.sp, fontWeight = FontWeight.Bold) }
 }
 
 @Composable

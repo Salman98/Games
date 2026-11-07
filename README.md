@@ -81,6 +81,22 @@ Add a new game: copy a game folder, rename its package and `applicationId`, add 
 - `core/src/main/res/values/ads.xml` holds Google's **test** ids. For each game you publish, copy that file to
   `<game>/src/main/res/values/ads.xml` and put the game's real AdMob app id and ad unit ids in it.
 
+## Firebase (Google Sign-In + cloud save)
+
+Project `techeliteclub-games`. Players can sign in with Google in **Settings**; their progress is saved to
+Firestore at `users/{uid}/games/{packageName}` (one account across all games) and restored on a new phone.
+
+One-time setup, on your machine: `bash scripts/firebase-setup.sh`. It registers the 7 games as Android apps,
+adds your debug SHA-1, enables Google Sign-In, creates the Firestore database (asks for its location), deploys
+`firestore.rules`, and writes each game's `google-services.json`. A game without that file still builds; the
+sign-in row just stays hidden (block-puzzle, color-sort and crown-logic for now).
+
+Before release, add the **release** and **Play App Signing** SHA-1s (Play Console → Test and release → App integrity),
+or Google Sign-In fails for Play installs:
+`npx -y firebase-tools@latest apps:android:sha:create <APP_ID> <SHA1> --project techeliteclub-games`
+
+Play also needs an account-deletion link in the Data safety form (in-app: Settings → Delete account).
+
 ## Before publishing a game
 
 1. Check `applicationId` in `<game>/build.gradle.kts` (`com.techeliteclub.game.<game>`; cannot change after first upload).

@@ -15,5 +15,12 @@ dependencies {
     implementation(libs.ump)
     implementation(libs.play.review) // in-app "rate this app" popup
     implementation(libs.work.runtime) // daily reminder
+    // Google Sign-In + cloud save (Cloud.kt)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
 }

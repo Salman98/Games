@@ -193,6 +193,11 @@ abstract class GameActivity : ComponentActivity() {
         music?.pause()
     }
 
+    override fun onStop() {
+        super.onStop()
+        Cloud.backup(this, GameStore(this))
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         sounds.release()
@@ -338,6 +343,15 @@ class GameStore(context: Context) {
     fun putString(key: String, value: String) = prefs.edit().putString(key, value).apply()
     fun getLong(key: String, default: Long = 0L) = prefs.getLong(key, default)
     fun putLong(key: String, value: Long) = prefs.edit().putLong(key, value).apply()
+    fun all(): Map<String, *> = prefs.all
+    fun putAll(values: Map<String, Any>) = prefs.edit().apply {
+        for ((k, v) in values) when (v) {
+            is Int -> putInt(k, v)
+            is Long -> putLong(k, v)
+            is Boolean -> putBoolean(k, v)
+            is String -> putString(k, v)
+        }
+    }.apply()
 }
 
 @Composable
