@@ -1,6 +1,5 @@
 package com.techeliteclub.game.blockpuzzle
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -163,7 +162,8 @@ fun BlockPuzzleGame(ads: Ads) {
                         }
                     }
                 }
-                AnimatedVisibility(popup != null, enter = fadeIn() + scaleIn(), exit = fadeOut()) {
+                // Full name: inside a Column the ColumnScope version would be picked, which is not allowed in this Box.
+                androidx.compose.animation.AnimatedVisibility(popup != null, enter = fadeIn() + scaleIn(), exit = fadeOut()) {
                     Text(
                         popup ?: "", fontSize = 34.sp, fontWeight = FontWeight.Black, color = Color.White,
                         modifier = Modifier.background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
