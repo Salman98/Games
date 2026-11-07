@@ -45,10 +45,10 @@ Build one game's release bundle: `./gradlew :block-puzzle:bundleRelease` (swap t
 
 Data safety answers (current code):
 - Collected by the AdMob SDK (per Google's AdMob data-disclosure guide): **Approximate location** (from IP), **Device or other IDs** (advertising ID), **App interactions**, **Crash logs**, **Diagnostics**. Purpose: Advertising, Analytics, Fraud prevention/security. Shared with Google (AdMob). Re-check the guide when you fill the form.
-- Encrypted in transit: Yes.
-- Not collected: precise location, contacts, photos, payments.
-- Google sign-in + cloud save (optional for players) also collects: **Personal info → Name, Email address, User IDs** and **App activity → Other actions** (game progress). Purpose: Account management, App functionality. Optional = Yes. Not shared.
-- Account deletion: **Yes**, in the app (Settings → Delete account). Play also asks for a web link: use your privacy page URL and say "delete in Settings → Delete account, or email us".
+- Encrypted in transit: Yes. No account exists; progress stays on the device.
+- Not collected: name, email, precise location, contacts, photos, payments.
+- No accounts in the games, so the account-deletion question is "No, users cannot create an account".
+- If you add Crashlytics/Analytics later (section 5), add Crash logs + Analytics here.
 
 ## 3. AdMob
 
@@ -92,13 +92,10 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 
 ## 5. Optional, later (tell me when done, I wire the code)
 
-- [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder
-- [ ] **Finish Firebase setup** (Google sign-in + cloud save need it): build any game once in Android Studio (creates the debug key), then run `bash scripts/firebase-setup.sh` again. It adds your SHA-1, creates the Firestore database (pick `asia-southeast1`), turns on Google sign-in and re-downloads `google-services.json` into 7 folders. Copy `arrow-escape/google-services.json` over the ones in `block-puzzle`, `color-sort`, `crown-logic`. Check: the file now has a non-empty `"oauth_client"`.
-- [ ] Before release: add the **Play App Signing** SHA-1 for each game (Play Console → Test and release → App integrity) with `npx -y firebase-tools@latest apps:android:sha:create <APP_ID> <SHA1> --project techeliteclub-games`, else sign-in fails for Play installs
+- [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder (no database or sign-in: not needed)
 - [ ] (Later) Analytics + Crashlytics: tell me, I add them
 - [ ] **Play Games Services** (leaderboards / sign-in): in Play Console → Play Games Services → create per game, add leaderboards (Block Grid: Best score, 2048: Best score, others: Stars), send me the game IDs + leaderboard IDs
-- [x] `privacy.html` covers sign-in + cloud save (re-upload it to your site)
-- [ ] Update `privacy.html` again if Play Games or Analytics is added
+- [ ] Update `privacy.html` if Crashlytics, Analytics or Play Games is added
 
 ## 6. Before pressing Publish (per game)
 

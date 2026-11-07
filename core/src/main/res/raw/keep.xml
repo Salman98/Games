@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Cloud.kt looks this up by name, so stop the release resource shrinker from removing it. -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/default_web_client_id" />
