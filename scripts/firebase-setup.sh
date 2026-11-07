@@ -45,7 +45,7 @@ done <<< "$APPS"
 if ! $FB firestore:databases:list --project "$PROJECT" | grep -q "(default)"; then
   $FB firestore:locations --project "$PROJECT"
   read -rp "Firestore location for the (default) database (e.g. nam5, eur3, asia-southeast1): " LOC
-  $FB firestore:databases:create "(default)" --edition=enterprise --location="$LOC" --project "$PROJECT"
+  $FB firestore:databases:create "(default)" --edition=standard --location="$LOC" --project "$PROJECT"
 fi
 
 # Google Sign-In provider + Firestore rules. Deploying auth creates the OAuth clients Google Sign-In needs.

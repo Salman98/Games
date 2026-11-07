@@ -45,9 +45,10 @@ Build one game's release bundle: `./gradlew :block-puzzle:bundleRelease` (swap t
 
 Data safety answers (current code):
 - Collected by the AdMob SDK (per Google's AdMob data-disclosure guide): **Approximate location** (from IP), **Device or other IDs** (advertising ID), **App interactions**, **Crash logs**, **Diagnostics**. Purpose: Advertising, Analytics, Fraud prevention/security. Shared with Google (AdMob). Re-check the guide when you fill the form.
-- Encrypted in transit: Yes. Users can request deletion: No account exists; progress is only on the device (uninstall deletes it).
-- Not collected: name, email, location (precise), contacts, photos, payments.
-- If you add Firebase later (section 5), add Analytics + Crash logs here.
+- Encrypted in transit: Yes.
+- Not collected: precise location, contacts, photos, payments.
+- Google sign-in + cloud save (optional for players) also collects: **Personal info → Name, Email address, User IDs** and **App activity → Other actions** (game progress). Purpose: Account management, App functionality. Optional = Yes. Not shared.
+- Account deletion: **Yes**, in the app (Settings → Delete account). Play also asks for a web link: use your privacy page URL and say "delete in Settings → Delete account, or email us".
 
 ## 3. AdMob
 
@@ -64,7 +65,7 @@ Data safety answers (current code):
   - Menu names may differ slightly if Google renames them; look for the closest match
 - [ ] Settings → copy your **publisher ID** (`pub-XXXXXXXXXXXXXXXX`) into `website/app-ads.txt`, then upload it (section 1)
 - [ ] Never tap your own live ads; use test ads while developing
-- [ ] Fill this table and send it to me (I put each row into `<module>/src/main/res/values/ads.xml`):
+- [x] Fill this table and send it to me (done, ids are in each `<module>/src/main/res/values/ads.xml`) (I put each row into `<module>/src/main/res/values/ads.xml`):
 
 | Module | App ID (`~`) | Banner (`/`) | Interstitial (`/`) | Rewarded (`/`) |
 |---|---|---|---|---|
@@ -91,9 +92,13 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 
 ## 5. Optional, later (tell me when done, I wire the code)
 
-- [ ] **Firebase** (Analytics + Crashlytics): create project "TechEliteClub Games", add 10 Android apps with the package names above, download each `google-services.json` into `<module>/` → tell me
+- [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder
+- [ ] **Finish Firebase setup** (Google sign-in + cloud save need it): build any game once in Android Studio (creates the debug key), then run `bash scripts/firebase-setup.sh` again. It adds your SHA-1, creates the Firestore database (pick `asia-southeast1`), turns on Google sign-in and re-downloads `google-services.json` into 7 folders. Copy `arrow-escape/google-services.json` over the ones in `block-puzzle`, `color-sort`, `crown-logic`. Check: the file now has a non-empty `"oauth_client"`.
+- [ ] Before release: add the **Play App Signing** SHA-1 for each game (Play Console → Test and release → App integrity) with `npx -y firebase-tools@latest apps:android:sha:create <APP_ID> <SHA1> --project techeliteclub-games`, else sign-in fails for Play installs
+- [ ] (Later) Analytics + Crashlytics: tell me, I add them
 - [ ] **Play Games Services** (leaderboards / sign-in): in Play Console → Play Games Services → create per game, add leaderboards (Block Grid: Best score, 2048: Best score, others: Stars), send me the game IDs + leaderboard IDs
-- [ ] Update `privacy.html` when Firebase or Play Games is added
+- [x] `privacy.html` covers sign-in + cloud save (re-upload it to your site)
+- [ ] Update `privacy.html` again if Play Games or Analytics is added
 
 ## 6. Before pressing Publish (per game)
 
