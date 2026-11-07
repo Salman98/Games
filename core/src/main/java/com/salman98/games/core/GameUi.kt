@@ -102,7 +102,9 @@ fun ResultDialog(
     AlertDialog(
         onDismissRequest = {},
         confirmButton = { TextButton(onClick = onClick) { Text(button) } },
-        dismissButton = secondButton?.let { { TextButton(onClick = onSecond) { Text(it) } } },
+        dismissButton = if (secondButton != null) {
+            { TextButton(onClick = onSecond) { Text(secondButton) } }
+        } else null,
         title = { Text(title) },
         text = { Text(text) },
     )
