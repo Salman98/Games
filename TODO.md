@@ -94,7 +94,7 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 
 - [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder (no database or sign-in: not needed)
 - [ ] (Later) Analytics + Crashlytics: tell me, I add them
-- [x] Update `privacy.html` if Crashlytics, Analytics or Play Games is added
+- [x] Update `privacy.html` if Crashlytics or Analytics is added
 
 ## 6. Before pressing Publish (per game)
 
