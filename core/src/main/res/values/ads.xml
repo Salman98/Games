@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Google's official TEST ids. Safe to use while developing.
+  Before publishing a game, copy this file to <game>/src/main/res/values/ads.xml
+  and put that game's real AdMob ids in it (the game's copy overrides this one).
+-->
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="ad_banner_id" translatable="false">ca-app-pub-3940256099942544/9214589741</string>
+    <string name="ad_interstitial_id" translatable="false">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="ad_rewarded_id" translatable="false">ca-app-pub-3940256099942544/5224354917</string>
+</resources>
