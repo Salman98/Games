@@ -33,7 +33,8 @@ fun canPlace(board: IntArray, p: Piece, r: Int, c: Int) = p.cells.all { (dr, dc)
 fun fitsAnywhere(board: IntArray, p: Piece) =
     (0 until SIZE).any { r -> (0 until SIZE).any { c -> canPlace(board, p, r, c) } }
 
-class PlaceResult(val board: IntArray, val linesCleared: Int, val points: Int)
+/** [cleared] holds the cell indexes emptied by full lines (for the flash animation). */
+class PlaceResult(val board: IntArray, val linesCleared: Int, val points: Int, val cleared: Set<Int>)
 
 /** Places [p] with its top-left at (r, c), clears full rows and columns. Caller checks [canPlace] first. */
 fun place(board: IntArray, p: Piece, r: Int, c: Int): PlaceResult {
@@ -41,8 +42,9 @@ fun place(board: IntArray, p: Piece, r: Int, c: Int): PlaceResult {
     for ((dr, dc) in p.cells) b[(r + dr) * SIZE + c + dc] = p.color
     val fullRows = (0 until SIZE).filter { row -> (0 until SIZE).all { b[row * SIZE + it] != 0 } }
     val fullCols = (0 until SIZE).filter { col -> (0 until SIZE).all { b[it * SIZE + col] != 0 } }
-    for (row in fullRows) for (i in 0 until SIZE) b[row * SIZE + i] = 0
-    for (col in fullCols) for (i in 0 until SIZE) b[i * SIZE + col] = 0
+    val cleared = fullRows.flatMap { row -> (0 until SIZE).map { row * SIZE + it } }.toSet() +
+        fullCols.flatMap { col -> (0 until SIZE).map { it * SIZE + col } }
+    for (i in cleared) b[i] = 0
     val lines = fullRows.size + fullCols.size
-    return PlaceResult(b, lines, p.cells.size + 10 * lines * lines) // multi-line clears score more
+    return PlaceResult(b, lines, p.cells.size + 10 * lines * lines, cleared) // multi-line clears score more
 }

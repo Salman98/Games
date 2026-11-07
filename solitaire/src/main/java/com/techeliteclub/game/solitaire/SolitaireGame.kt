@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
@@ -29,12 +31,14 @@ import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.ResultDialog
+import com.techeliteclub.game.core.rememberFeedback
 import com.techeliteclub.game.core.rememberStore
 import kotlin.random.Random
 
 @Composable
 fun SolitaireGame(ads: Ads) {
     val store = rememberStore()
+    val feedback = rememberFeedback()
     val rng = remember { Random(System.nanoTime()) }
     var board by remember { mutableStateOf(deal(rng)) }
     var history by remember { mutableStateOf(listOf<Board>()) }
@@ -43,20 +47,24 @@ fun SolitaireGame(ads: Ads) {
     val won = isWon(board)
 
     fun commit(next: Board) { history = (history + listOf(board)).takeLast(200); board = next; hinted = null }
-    fun tap(src: Source) { autoMove(board, src)?.let(::commit) }
+    fun tap(src: Source) {
+        val next = autoMove(board, src)
+        if (next != null) { commit(next); feedback.good() } else feedback.bad()
+    }
     fun newDeal() { ads.levelDone(); board = deal(rng); history = emptyList(); hinted = null }
 
-    GameScaffold("Solitaire", "Wins: $wins", ads, ::newDeal, "Hint", { hinted = hint(board) }) {
+    GameScaffold("Solitaire", "Wins $wins · Moves ${history.size}", ads, ::newDeal, "Hint", { hinted = hint(board) }) {
         BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
             val w = maxWidth / 7
             val h = w * 1.4f
             val top = h + 12.dp
             // Top row: stock, waste, undo, foundations.
-            CardSlot(w, h, 0.dp, 0.dp, board.stock.lastOrNull(), false, emptyLabel = "↻", onClick = { commit(draw(board)) })
+            CardSlot(w, h, 0.dp, 0.dp, board.stock.lastOrNull(), false, emptyLabel = "↻",
+                onClick = { commit(draw(board)); feedback.tap() })
             CardSlot(w, h, w, 0.dp, board.waste.lastOrNull(), hinted == Source.Waste) { tap(Source.Waste) }
             TextButton(onClick = {
                 history.lastOrNull()?.let { board = it; history = history.dropLast(1) }
-            }, enabled = history.isNotEmpty(), modifier = Modifier.offset(w * 2, 0.dp).size(w, h)) { Text("Undo") }
+            }, enabled = history.isNotEmpty(), modifier = Modifier.offset(w * 2, 0.dp).size(w, h)) { Text("↶") }
             for (s in 0 until 4) {
                 CardSlot(w, h, w * (3 + s), 0.dp, board.foundations[s].lastOrNull(), false, "♠♥♦♣"[s].toString()) {
                     tap(Source.Foundation(s))
@@ -71,6 +79,12 @@ fun SolitaireGame(ads: Ads) {
                     CardSlot(w, h, w * col, top + step * i, card, hinted == src) { tap(src) }
                 }
             }
+            if (canAutoFinish(board)) {
+                Button(
+                    onClick = { commit(autoFinish(board)); feedback.win() },
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                ) { Text("Auto finish") }
+            }
         }
     }
 
@@ -79,7 +93,7 @@ fun SolitaireGame(ads: Ads) {
             wins++
             store.put("wins", wins)
             newDeal()
-        })
+        }, emoji = "🃏")
     }
 }
 
@@ -105,9 +119,16 @@ private fun CardSlot(
     ) {
         when {
             card == null -> Text(emptyLabel, Modifier.align(Alignment.Center), color = Color.Gray)
-            card.up -> Text(
-                card.label, Modifier.padding(3.dp), fontSize = (w.value * 0.28f).sp,
-                color = if (card.red) Color(0xFFC62828) else Color.Black,
+            card.up -> {
+                val ink = if (card.red) Color(0xFFC62828) else Color(0xFF212121)
+                Text(card.label, Modifier.padding(horizontal = 3.dp), fontSize = (w.value * 0.26f).sp,
+                    fontWeight = FontWeight.Bold, color = ink)
+                Text("♠♥♦♣"[card.suit].toString(), Modifier.align(Alignment.BottomEnd).padding(3.dp),
+                    fontSize = (w.value * 0.42f).sp, color = ink)
+            }
+            else -> Box( // simple pattern on the card back
+                Modifier.align(Alignment.Center).size(w * 0.5f, h * 0.6f)
+                    .border(1.5.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
             )
         }
     }
