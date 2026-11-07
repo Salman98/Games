@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "com.salman98.games.tilemahjong"
     defaultConfig {
-        applicationId = "com.salman98.games.tilemahjong" // cannot change after the first Play upload
+        applicationId = "com.techeliteclub.tilemahjong" // cannot change after the first Play upload
         versionCode = 1
         versionName = "1.0"
     }

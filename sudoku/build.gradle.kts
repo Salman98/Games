@@ -7,7 +7,7 @@ plugins {
 android {
     namespace = "com.salman98.games.sudoku"
     defaultConfig {
-        applicationId = "com.salman98.games.sudoku" // cannot change after the first Play upload
+        applicationId = "com.techeliteclub.sudoku" // cannot change after the first Play upload
         versionCode = 1
         versionName = "1.0"
     }

@@ -48,7 +48,7 @@ Add a new game: copy a game folder, rename its package and `applicationId`, add 
 
 ## Before publishing a game
 
-1. Check `applicationId` in `<game>/build.gradle.kts` (cannot change after first upload).
+1. Check `applicationId` in `<game>/build.gradle.kts` (`com.techeliteclub.<game>`; cannot change after first upload).
 2. Real AdMob ids (above) and an `app-ads.txt` on your developer website.
 3. Replace the placeholder icon (`core/src/main/res/drawable/ic_launcher_fg.xml`) and colour (`<game>/src/main/res/values/game.xml`).
 4. Release signing key (Android Studio → Build → Generate Signed Bundle).
