@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Vibration for taps, line clears, mistakes and wins (normal permission, no prompt). -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Daily "your puzzle is waiting" reminder (asked on the second launch, Android 13+). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application>
         <!-- Each game can override @string/admob_app_id with its real AdMob app ID. -->
         <meta-data

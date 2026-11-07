@@ -84,14 +84,17 @@ fun SolitaireGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
     val rng = remember { Random(System.nanoTime()) }
-    var board by remember { mutableStateOf(deal(rng)) }
+    // Resume the deal from last time (it is saved after every move).
+    val saved = remember { decodeBoard(store.getString("save")) }
+    var board by remember { mutableStateOf(saved ?: deal(rng)) }
     var history by remember { mutableStateOf(listOf<Board>()) }
     var hinted by remember { mutableStateOf<Source?>(null) }
     var wins by remember { mutableIntStateOf(store.get("wins")) }
     // Saved game counter: each new game (and each app launch) gets its own free hint.
-    var dealNo by remember { mutableIntStateOf((store.get("game_no") + 1).also { store.put("game_no", it) }) }
+    var dealNo by remember { mutableIntStateOf(if (saved != null) store.get("game_no") else (store.get("game_no") + 1).also { store.put("game_no", it) }) }
     var seconds by remember { mutableIntStateOf(0) }
     val won = isWon(board)
+    LaunchedEffect(board) { store.putString("save", encodeBoard(board)) }
     LaunchedEffect(dealNo, won) { while (!won) { delay(1000); seconds++ } }
 
     fun commit(next: Board) { history = (history + listOf(board)).takeLast(200); board = next; hinted = null }

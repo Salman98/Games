@@ -13,4 +13,6 @@ dependencies {
     api(libs.activity.compose)
     api(libs.play.services.ads)
     implementation(libs.ump)
+    implementation(libs.play.review) // in-app "rate this app" popup
+    implementation(libs.work.runtime) // daily reminder
 }

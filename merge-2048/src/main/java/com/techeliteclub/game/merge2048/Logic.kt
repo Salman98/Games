@@ -53,3 +53,14 @@ fun spawn(board: IntArray, rng: Random): IntArray {
 fun newBoard(rng: Random) = spawn(spawn(IntArray(N * N), rng), rng)
 
 fun canMove(board: IntArray) = Dir.entries.any { slide(board, it).moved }
+
+/** Saved game as text: "tiles;score". */
+fun encodeGame(board: IntArray, score: Int) = board.joinToString(",") + ";" + score
+
+/** Null when missing or damaged (then a new game starts). */
+fun decodeGame(text: String?): Pair<IntArray, Int>? = runCatching {
+    val (b, s) = text!!.split(";")
+    val board = b.split(",").map { it.toInt() }.toIntArray()
+    require(board.size == N * N)
+    board to s.toInt()
+}.getOrNull()

@@ -10,6 +10,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +42,8 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
@@ -122,8 +126,9 @@ fun HomeScreen(
 }
 
 /**
- * Full-screen result. [win] adds light rays, falling confetti and [stars] gold stars (0–3) that pop in.
- * [text] lines become rows in the glass card ("Moves: 18" shows as label + value).
+ * Full-screen result. A win gets a flash, fireworks, light rays, confetti, the ribbon dropping in,
+ * [stars] gold stars (0–3) popping in one by one with a sparkle, sound and buzz each, numbers that
+ * count up and a pulsing button. [text] lines become rows in the glass card ("Moves: 18" → label + value).
  */
 @Composable
 fun ResultDialog(
@@ -139,38 +144,64 @@ fun ResultDialog(
 ) {
     val t = LocalGameTheme.current
     val feedback = rememberFeedback()
-    LaunchedEffect(Unit) { if (win) feedback.win() else feedback.bad() }
+    val store = rememberStore()
+    val activity = androidx.compose.ui.platform.LocalContext.current as? android.app.Activity
+    val appear = remember { Animatable(0f) }
+    val ribbon = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        if (win) feedback.win() else feedback.bad()
+        appear.animateTo(1f, tween(if (win) 450 else 250))
+    }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(if (win) 250L else 0L)
+        ribbon.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 260f))
+    }
     Box(
         Modifier.fillMaxSize()
-            .background(Color.Black.copy(alpha = if (win) 0.6f else 0.7f))
+            .graphicsLayer { alpha = appear.value.coerceIn(0f, 1f) }
+            .background(Color.Black.copy(alpha = if (win) 0.62f else 0.72f))
             .pointerInput(Unit) { detectTapGestures { } }, // block taps on the game below
         contentAlignment = Alignment.Center,
     ) {
-        if (win) { LightRays(); Confetti() }
+        if (win) { LightRays(); Confetti(); Fireworks(); Flash() }
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(24.dp)) {
             if (win && stars > 0) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     for (i in 0 until 3) {
                         val pop = remember { Animatable(0f) }
+                        val earned = i < stars
                         LaunchedEffect(Unit) {
-                            kotlinx.coroutines.delay(250L + i * 220L)
-                            pop.animateTo(1f, spring(dampingRatio = 0.45f, stiffness = 300f))
+                            kotlinx.coroutines.delay(550L + i * 300L)
+                            if (earned) feedback.star()
+                            pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = 320f))
                         }
                         val big = i == 1
-                        GoldIcon(
-                            if (i < stars) GameIcons.StarGold else GameIcons.StarEmpty, if (big) 120.dp else 86.dp,
-                            Modifier.scale(pop.value).rotate(if (i == 0) -14f else if (i == 2) 14f else 0f).offset(y = if (big) 0.dp else 8.dp),
-                        )
+                        val size = if (big) 120.dp else 86.dp
+                        Box(contentAlignment = Alignment.Center) {
+                            if (earned) StarBurst(pop.value, size * 1.8f)
+                            GoldIcon(
+                                if (earned) GameIcons.StarGold else GameIcons.StarEmpty, size,
+                                Modifier.scale(pop.value).rotate(if (i == 0) -14f else if (i == 2) 14f else 0f).offset(y = if (big) 0.dp else 8.dp),
+                            )
+                        }
                     }
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(4.dp))
             }
             Box(
                 Modifier
+                    .graphicsLayer {
+                        val v = ribbon.value
+                        scaleX = 0.6f + 0.4f * v; scaleY = 0.6f + 0.4f * v
+                        translationY = (1f - v) * -120f
+                        alpha = v.coerceIn(0f, 1f)
+                    }
+                    .shadow(12.dp, RoundedCornerShape(16.dp))
                     .background(
                         Brush.verticalGradient(if (win) listOf(Color(0xFFFF6B7F), Color(0xFFD6143A)) else listOf(Color(0xFF6B7393), Color(0xFF3A3F5C))),
                         RoundedCornerShape(16.dp),
                     )
+                    .border(2.dp, if (win) Color(0xFFFFD34D) else Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
                     .padding(horizontal = 30.dp, vertical = 10.dp),
             ) { GradientText(title.uppercase(), listOf(Color.White, Color(0xFFFFE1E6)), 30.sp, stroke = Color(0xFF5A0A1E)) }
             if (text.isNotBlank()) {
@@ -178,12 +209,20 @@ fun ResultDialog(
                     Modifier.padding(top = 24.dp).width(300.dp).glass(t.copy(light = false), RoundedCornerShape(24.dp)).padding(horizontal = 22.dp, vertical = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    for (line in text.split('\n')) {
+                    text.split('\n').forEachIndexed { i, line ->
+                        val rowIn = remember { Animatable(0f) }
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay((if (win) 900L else 150L) + i * 140L)
+                            rowIn.animateTo(1f, tween(300))
+                        }
                         val parts = line.split(":", limit = 2)
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            Modifier.fillMaxWidth().graphicsLayer { alpha = rowIn.value; translationY = (1f - rowIn.value) * 30f },
+                            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             if (parts.size == 2) {
                                 Text(parts[0].trim(), color = Color.White.copy(alpha = 0.8f), fontSize = 15.sp, fontWeight = FontWeight.ExtraBold)
-                                Text(parts[1].trim(), color = Color.White, style = displayStyle(24.sp))
+                                CountUpText(parts[1].trim(), start = rowIn.value > 0f)
                             } else {
                                 Text(line, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
                             }
@@ -191,7 +230,15 @@ fun ResultDialog(
                     }
                 }
             }
-            PrimaryButton(button, Modifier.padding(top = 28.dp).width(280.dp), height = 74.dp, fontSize = 30.sp, onClick = onClick)
+            // The main button breathes gently so the next step is obvious.
+            val pulse by rememberInfiniteTransition(label = "pulse").animateFloat(
+                1f, 1.05f, infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "scale",
+            )
+            PrimaryButton(button, Modifier.padding(top = 28.dp).width(280.dp).scale(if (win) pulse else 1f), height = 74.dp, fontSize = 30.sp) {
+                // Happy players are asked for a rating (Google shows it at most occasionally).
+                if (win && stars >= 3 && activity != null) RateApp.onGreatWin(activity, store)
+                onClick()
+            }
             if (secondButton != null) {
                 Box(Modifier.padding(top = 16.dp)) {
                     GlassPill(Modifier.pressable(onClick = onSecond)) {
@@ -199,6 +246,82 @@ fun ResultDialog(
                         Text(secondButton.removePrefix("▶ "), color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
                     }
                 }
+            }
+        }
+    }
+}
+
+/** A number like "3,280" or "18" counts up from 0 once [start] is true; anything else shows as is. */
+@Composable
+private fun CountUpText(value: String, start: Boolean) {
+    val target = value.replace(",", "").toIntOrNull()
+    if (target == null) {
+        Text(value, color = Color.White, style = displayStyle(24.sp))
+        return
+    }
+    val n = remember { Animatable(0f) }
+    LaunchedEffect(start) { if (start) n.animateTo(target.toFloat(), tween(900)) }
+    val shown = n.value.toInt()
+    Text(if (value.contains(',')) "%,d".format(shown) else "$shown", color = Color.White, style = displayStyle(24.sp))
+}
+
+/** Quick white flash as the win screen opens. */
+@Composable
+private fun Flash() {
+    val a = remember { Animatable(0.55f) }
+    LaunchedEffect(Unit) { a.animateTo(0f, tween(450)) }
+    Box(Modifier.fillMaxSize().background(Color.White.copy(alpha = a.value)))
+}
+
+/** Gold sparkle rays bursting out behind a star as it pops ([progress] 0..1+). */
+@Composable
+private fun StarBurst(progress: Float, size: androidx.compose.ui.unit.Dp) {
+    if (progress <= 0f) return
+    Canvas(Modifier.size(size)) {
+        val c = Offset(this.size.width / 2, this.size.height / 2)
+        val p = progress.coerceIn(0f, 1.2f)
+        val fade = (1.2f - p).coerceIn(0f, 1f)
+        for (k in 0 until 10) {
+            val a = Math.toRadians(k * 36.0 + 18)
+            val dir = Offset(cos(a).toFloat(), sin(a).toFloat())
+            val r0 = this.size.minDimension * 0.22f * p
+            val r1 = this.size.minDimension * 0.5f * p
+            drawLine(Color(0xFFFFE680).copy(alpha = fade), c + dir * r0, c + dir * r1, 4.dp.toPx(), androidx.compose.ui.graphics.StrokeCap.Round)
+        }
+    }
+}
+
+private class Burst(val x: Float, val y: Float, val delay: Float, val color: Color, val sparks: List<Pair<Float, Float>>)
+
+/** Fireworks: a few colourful bursts that fall with gravity and fade. */
+@Composable
+private fun Fireworks() {
+    val bursts = remember {
+        val r = Random(5)
+        val colors = listOf(Color(0xFFFFD84A), Color(0xFFFF5A7A), Color(0xFF5AA8FF), Color(0xFF4FE08A), Color(0xFFC47BFF))
+        listOf(0.25f to 0.28f, 0.75f to 0.22f, 0.5f to 0.14f, 0.32f to 0.42f, 0.7f to 0.4f).mapIndexed { i, (x, y) ->
+            Burst(x, y, i * 0.32f, colors[i % colors.size], List(34) { (it / 34f) * 6.283f + r.nextFloat() * 0.2f to 0.6f + r.nextFloat() * 0.5f })
+        }
+    }
+    var secs by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        val start = withFrameNanos { it }
+        while (secs < 3.5f) withFrameNanos { secs = (it - start) / 1e9f }
+    }
+    Canvas(Modifier.fillMaxSize()) {
+        val reach = size.minDimension * 0.28f
+        for (b in bursts) {
+            val tt = secs - b.delay
+            if (tt < 0f || tt > 1.6f) continue
+            val o = Offset(b.x * size.width, b.y * size.height)
+            val fade = (1f - tt / 1.6f).coerceIn(0f, 1f)
+            val spread = reach * (1f - (1f - (tt / 1.6f).coerceAtMost(1f)).let { it * it * it })
+            for ((angle, speed) in b.sparks) {
+                val dir = Offset(cos(angle), sin(angle))
+                val p = o + dir * (spread * speed) + Offset(0f, 60f * tt * tt) // gentle gravity
+                val tail = o + dir * (spread * speed * 0.8f) + Offset(0f, 60f * tt * tt)
+                drawLine(b.color.copy(alpha = fade * 0.5f), tail, p, 2.dp.toPx())
+                drawCircle(b.color.copy(alpha = fade), 2.6.dp.toPx() * (0.6f + fade * 0.4f), p)
             }
         }
     }
@@ -279,6 +402,7 @@ fun SettingsSheet(ads: Ads, settings: GameSettings, onClose: () -> Unit) {
             SettingRow(GameIcons.Sound, "Sound effects", settings.sound) { settings.switchSound(it) }
             SettingRow(GameIcons.Music, "Music", settings.music) { settings.switchMusic(it) }
             SettingRow(GameIcons.Vibrate, "Vibration", settings.vibration) { settings.switchVibration(it) }
+            SettingRow(GameIcons.Bell, "Daily reminder", settings.reminders) { settings.switchReminders(it) }
             if (ads.privacyOptionsRequired) {
                 GlassPill(Modifier.pressable { ads.showPrivacyOptions() }) { PillText("Privacy options") }
             }

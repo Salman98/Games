@@ -54,6 +54,7 @@ object GameIcons {
     val Trophy = line("trophy", "M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z", "M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3")
     val Check = line("check", "M5 12l5 5L20 7", width = 3.2f)
     val Close = line("close", "M5 5l14 14M19 5L5 19", width = 3f)
+    val Bell = line("bell", "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9", "M13.7 21a2 2 0 0 1-3.4 0")
     val Vibrate = line("vibrate", "M8 4h8v16H8z", "M4 8v8M20 8v8")
 
     val Play = filled("play", "M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z", SolidColor(Color.White))

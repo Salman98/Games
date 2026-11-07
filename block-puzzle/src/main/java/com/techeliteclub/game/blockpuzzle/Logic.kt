@@ -48,3 +48,25 @@ fun place(board: IntArray, p: Piece, r: Int, c: Int): PlaceResult {
     val lines = fullRows.size + fullCols.size
     return PlaceResult(b, lines, p.cells.size + 10 * lines * lines, cleared) // multi-line clears score more
 }
+
+/** Saved game as text: "board;score;piece|piece|piece" where a piece is "color:r.c,r.c" or "-" (used). */
+fun encodeGame(board: IntArray, pieces: List<Piece?>, score: Int): String =
+    board.joinToString(",") + ";" + score + ";" +
+        pieces.joinToString("|") { p -> p?.let { it.color.toString() + ":" + it.cells.joinToString(",") { (r, c) -> "$r.$c" } } ?: "-" }
+
+class SavedGame(val board: IntArray, val pieces: List<Piece?>, val score: Int)
+
+/** Null when the text is missing or damaged (then a new game starts). */
+fun decodeGame(text: String?): SavedGame? = runCatching {
+    val (b, s, p) = text!!.split(";")
+    val board = b.split(",").map { it.toInt() }.toIntArray()
+    require(board.size == SIZE * SIZE)
+    val pieces = p.split("|").map { part ->
+        if (part == "-") null else {
+            val (color, cells) = part.split(":")
+            Piece(cells.split(",").map { rc -> rc.split(".").let { it[0].toInt() to it[1].toInt() } }, color.toInt())
+        }
+    }
+    require(pieces.size == 3)
+    SavedGame(board, pieces, s.toInt())
+}.getOrNull()

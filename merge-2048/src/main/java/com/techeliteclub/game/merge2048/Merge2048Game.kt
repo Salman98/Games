@@ -89,17 +89,20 @@ fun Merge2048Game(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
     val rng = remember { Random(System.nanoTime()) }
-    var board by remember { mutableStateOf(newBoard(rng)) }
-    var score by remember { mutableIntStateOf(0) }
+    // Resume the game from last time (it is saved after every move).
+    val saved = remember { decodeGame(store.getString("save")) }
+    var board by remember { mutableStateOf(saved?.first ?: newBoard(rng)) }
+    var score by remember { mutableIntStateOf(saved?.second ?: 0) }
     var best by remember { mutableIntStateOf(store.get("best")) }
     var undo by remember { mutableStateOf<Pair<IntArray, Int>?>(null) }
     var celebrated by remember { mutableStateOf(false) }
     // Saved game counter: each new game (and each app launch) gets its own free hint.
-    var gameNo by remember { mutableIntStateOf((store.get("game_no") + 1).also { store.put("game_no", it) }) }
+    var gameNo by remember { mutableIntStateOf(if (saved != null) store.get("game_no") else (store.get("game_no") + 1).also { store.put("game_no", it) }) }
     var popup by remember { mutableStateOf<String?>(null) }
     var popupId by remember { mutableIntStateOf(0) }
     val over = !canMove(board)
 
+    LaunchedEffect(board, score) { store.putString("save", encodeGame(board, score)) }
     LaunchedEffect(popupId) { if (popup != null) { delay(800); popup = null } }
 
     fun swipe(dir: Dir) {

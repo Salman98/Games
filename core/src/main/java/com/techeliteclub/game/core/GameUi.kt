@@ -1,11 +1,14 @@
 package com.techeliteclub.game.core
 
+import android.Manifest
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,10 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,7 +75,9 @@ abstract class GameActivity : ComponentActivity() {
     @Composable
     abstract fun Game(ads: Ads)
 
+    private val askNotifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
     private lateinit var sounds: Sounds
+    private lateinit var haptics: Haptics
     private var music: Music? = null
     private lateinit var settings: GameSettings
 
@@ -84,7 +86,16 @@ abstract class GameActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val store = GameStore(this)
         settings = GameSettings(store)
+        // Ask for reminder notifications on the second launch (not the first), once.
+        val launches = store.get("launches") + 1
+        store.put("launches", launches)
+        if (Build.VERSION.SDK_INT >= 33 && launches >= 2 && !store.getBool("asked_notifications", false)) {
+            store.putBool("asked_notifications", true)
+            askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        Reminder.schedule(this)
         sounds = Sounds(this)
+        haptics = Haptics(this)
         music = Music(this)
         val ads = Ads(this).also { it.start() }
         setContent {
@@ -93,12 +104,14 @@ abstract class GameActivity : ComponentActivity() {
                 LocalGameTheme provides gameTheme,
                 LocalDisplayFont provides rememberDisplayFont(),
                 LocalSounds provides sounds,
+                LocalHaptics provides haptics,
                 LocalSettings provides settings,
             ) {
                 MaterialTheme(colorScheme = scheme) {
                     var screen by rememberSaveable { mutableStateOf("home") }
                     var showSettings by remember { mutableStateOf(false) }
                     val nav = remember { GameNav(home = { screen = "home" }, settings = { showSettings = true }) }
+                    LaunchedEffect(screen) { if (screen == "play") Reminder.markPlayed(store) }
                     LaunchedEffect(settings.music) { if (settings.music) music?.start() else music?.pause() }
                     BackHandler(enabled = screen != "home" || showSettings) {
                         if (showSettings) showSettings = false else screen = "home"
@@ -213,12 +226,12 @@ fun GameScaffold(
     }
 }
 
-/** Click sound + vibration, following the player's settings. */
+/** Sound + vibration for game events, following the player's settings. */
 class Feedback(
     private val view: View,
-    private val haptic: HapticFeedback,
     private val sounds: Sounds?,
     private val settings: GameSettings?,
+    private val haptics: Haptics?,
 ) {
     private fun sfx(s: Sfx) {
         if (settings?.sound != false) {
@@ -226,24 +239,25 @@ class Feedback(
         }
     }
 
-    private fun buzz(type: HapticFeedbackType) {
-        if (settings?.vibration != false) haptic.performHapticFeedback(type)
+    private inline fun buzz(pattern: Haptics.() -> Unit) {
+        if (settings?.vibration != false) haptics?.pattern()
     }
 
-    fun tap() = sfx(Sfx.TAP)
-    fun good() { sfx(Sfx.PLACE); buzz(HapticFeedbackType.TextHandleMove) }
-    fun clear() { sfx(Sfx.CLEAR); buzz(HapticFeedbackType.LongPress) }
-    fun bad() { sfx(Sfx.ERROR); buzz(HapticFeedbackType.LongPress) }
-    fun win() { sfx(Sfx.WIN); buzz(HapticFeedbackType.LongPress) }
+    fun tap() { sfx(Sfx.TAP); buzz { tick() } }
+    fun good() { sfx(Sfx.PLACE); buzz { place() } }
+    fun clear() { sfx(Sfx.CLEAR); buzz { clear() } }
+    fun bad() { sfx(Sfx.ERROR); buzz { error() } }
+    fun star() { sfx(Sfx.STAR); buzz { star() } }
+    fun win() { sfx(Sfx.WIN); buzz { win() } }
 }
 
 @Composable
 fun rememberFeedback(): Feedback {
     val view = LocalView.current
-    val haptic = LocalHapticFeedback.current
     val sounds = LocalSounds.current
     val settings = LocalSettings.current
-    return remember(view, haptic, sounds, settings) { Feedback(view, haptic, sounds, settings) }
+    val haptics = LocalHaptics.current
+    return remember(view, sounds, settings, haptics) { Feedback(view, sounds, settings, haptics) }
 }
 
 /** Distinct colours shared by the games (tiles, balls, regions). */
@@ -267,6 +281,10 @@ class GameStore(context: Context) {
     fun put(key: String, value: Int) = prefs.edit().putInt(key, value).apply()
     fun getBool(key: String, default: Boolean) = prefs.getBoolean(key, default)
     fun putBool(key: String, value: Boolean) = prefs.edit().putBoolean(key, value).apply()
+    fun getString(key: String): String? = prefs.getString(key, null)
+    fun putString(key: String, value: String) = prefs.edit().putString(key, value).apply()
+    fun getLong(key: String, default: Long = 0L) = prefs.getLong(key, default)
+    fun putLong(key: String, value: Long) = prefs.edit().putLong(key, value).apply()
 }
 
 @Composable
