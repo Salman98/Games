@@ -2,7 +2,8 @@ package com.techeliteclub.game.tilemahjong
 
 import kotlin.random.Random
 
-val SYMBOLS = listOf("🍎", "🍋", "🍇", "🍉", "🍒", "🥝", "🌸", "🌻", "🐟", "🐱", "🐶", "⭐", "🍀", "🍄", "🎈", "🔔")
+/** Number of different tile pictures (drawn in TileSymbols.kt: 8 shapes × 2 colour sets). */
+const val SYMBOL_COUNT = 16
 
 const val COLS = 6
 const val ROWS = 6
@@ -31,7 +32,7 @@ fun remove(t: Tiles, a: Pos, b: Pos): Tiles = t - a - b
 
 class Level(val tiles: Tiles, val removalOrder: List<Pair<Pos, Pos>>)
 
-fun typesFor(level: Int) = minOf(6 + level / 2, SYMBOLS.size)
+fun typesFor(level: Int) = minOf(6 + level / 2, SYMBOL_COUNT)
 
 /** Tiles in each layer row must stay one unbroken run while building, or a gap can never be filled. */
 private fun rowContiguous(t: Map<Pos, Int>, p: Pos): Boolean {

@@ -38,6 +38,14 @@ core/                             ads (consent + G-rated ads), shared screen, sa
 
 Add a new game: copy a game folder, rename its package and `applicationId`, add one line in `settings.gradle.kts`.
 
+## Look & sound
+
+- Every game has a home screen, its own colour world (`core/.../Theme.kt` → `Themes`), glass buttons, a framed board and an animated win screen. Design mockups: the "Puzzle Games – Screen Mockups" canvas.
+- **Logo font:** download [Lilita One](https://fonts.google.com/specimen/Lilita+One) (free, OFL) and save it as `core/src/main/assets/fonts/LilitaOne-Regular.ttf`. Without it a heavy system font is used.
+- **Sounds:** `core/src/main/res/raw/` (`sfx_tap`, `sfx_place`, `sfx_clear`, `sfx_win`, `sfx_error`, `music_loop`). They are simple synthesised placeholders; replace a file with the same name to change a sound.
+- Players can switch sound, music and vibration off in Settings (gear icon).
+- Hints: the first hint in each level is free, after that it plays a rewarded ad (`GameScaffold` in `core/.../GameUi.kt`).
+
 ## Ads
 
 - Ads are limited to **G rating** (`core/.../Ads.kt`), because children may play even though the apps target 13+.
