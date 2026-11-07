@@ -17,6 +17,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Sort
     override val logoLines = listOf("COLOR", "SORT")
     override val tagline = "Pour, match, relax."
+    override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)

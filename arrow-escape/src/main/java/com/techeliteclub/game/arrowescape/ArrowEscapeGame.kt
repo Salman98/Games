@@ -39,6 +39,7 @@ import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.ResultDialog
 import com.techeliteclub.game.core.Tool
@@ -83,9 +84,10 @@ fun ArrowTile(d: Dir, size: Dp, modifier: Modifier = Modifier, glow: Boolean = f
 fun ArrowEscapeGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val n = sizeFor(level)
-    var board by remember(level) { mutableStateOf(newLevel(level, Random(level.toLong()))) }
+    var board by remember(level) { mutableStateOf(newLevel(level, Random(mode.seedFor(level)))) }
     var history by remember(level) { mutableStateOf(listOf<List<Dir?>>()) }
     var lives by remember(level) { mutableIntStateOf(LIVES) }
     var hinted by remember(level) { mutableStateOf<Int?>(null) }
@@ -100,7 +102,7 @@ fun ArrowEscapeGame(ads: Ads) {
     }
 
     fun restart() {
-        board = newLevel(level, Random(level.toLong())); history = emptyList(); lives = LIVES; hinted = null; blocked = null; leaving = emptyMap()
+        board = newLevel(level, Random(mode.seedFor(level))); history = emptyList(); lives = LIVES; hinted = null; blocked = null; leaving = emptyMap()
     }
 
     fun tap(i: Int) {
@@ -123,12 +125,12 @@ fun ArrowEscapeGame(ads: Ads) {
 
     GameScaffold(
         ads, "ARROW ESCAPE",
-        pills = listOf(Pill("LEVEL $level"), Pill("$lives / $LIVES", GameIcons.Heart, gold = true)),
+        pills = listOf(Pill(mode.label(level)), Pill("$lives / $LIVES", GameIcons.Heart, gold = true)),
         tools = listOf(
             Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { board = history.last(); history = history.dropLast(1); blocked = null },
             Tool("Restart", GameIcons.Restart, onClick = ::restart),
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = level) { hinted = board.indices.firstOrNull { canExit(board, n, it) } },
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level)) { hinted = board.indices.firstOrNull { canExit(board, n, it) } },
     ) {
         Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 10.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -171,11 +173,12 @@ fun ArrowEscapeGame(ads: Ads) {
     when {
         won -> {
             val stars = 1 + lives.coerceAtMost(2)
-            ResultDialog("Board cleared", "Level: $level\nLives left: $lives", "Next level", {
+            ResultDialog("Board cleared", "Level: $level\nLives left: $lives", if (mode.daily) "Done" else "Next level", {
                 ads.levelDone()
-                store.put("stars", store.get("stars") + stars)
-                level++
-                store.put("level", level)
+                mode.win(store, level, stars) {
+                    level++
+                    store.put("level", level)
+                }
             }, stars = stars)
         }
         lives == 0 -> ResultDialog(

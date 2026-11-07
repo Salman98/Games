@@ -43,6 +43,7 @@ import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.GlassPill
 import com.techeliteclub.game.core.GoldIcon
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.PillText
 import com.techeliteclub.game.core.ResultDialog
@@ -118,8 +119,9 @@ fun RegionBoard(
 fun CrownLogicGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
-    val puzzle = remember(level) { newPuzzle(level, Random(level.toLong())) }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
+    val puzzle = remember(level) { newPuzzle(level, Random(mode.seedFor(level))) }
     val n = puzzle.n
     var cells by remember(level) { mutableStateOf(IntArray(n * n)) }
     var history by remember(level) { mutableStateOf(listOf<IntArray>()) }
@@ -151,13 +153,13 @@ fun CrownLogicGame(ads: Ads) {
 
     GameScaffold(
         ads, "CROWN LOGIC",
-        pills = listOf(Pill("LEVEL $level"), Pill(time(seconds), GameIcons.Clock)),
+        pills = listOf(Pill(mode.label(level)), Pill(time(seconds), GameIcons.Clock)),
         tools = listOf(
             Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { cells = history.last(); history = history.dropLast(1) },
             Tool("Clear ✕", GameIcons.Erase) { change(IntArray(n * n) { if (cells[it] == MARK) EMPTY else cells[it] }) },
             Tool("Restart", GameIcons.Restart) { change(IntArray(n * n)); hintCell = null; seconds = 0 },
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = level, onHint = ::hint),
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), onHint = ::hint),
     ) {
         Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 5.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -179,11 +181,12 @@ fun CrownLogicGame(ads: Ads) {
 
     if (won) {
         val stars = when { seconds < 60 * n / 2 -> 3; seconds < 60 * n -> 2; else -> 1 }
-        ResultDialog("Solved!", "Level: $level\nTime: ${time(seconds)}", "Next level", {
+        ResultDialog("Solved!", "Level: $level\nTime: ${time(seconds)}", if (mode.daily) "Done" else "Next level", {
             ads.levelDone()
-            store.put("stars", store.get("stars") + stars)
-            level++
-            store.put("level", level)
+            mode.win(store, level, stars) {
+                level++
+                store.put("level", level)
+            }
         }, stars = stars)
     }
 }

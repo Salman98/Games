@@ -38,6 +38,7 @@ import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.GlassPill
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.PillText
 import com.techeliteclub.game.core.ResultDialog
@@ -113,14 +114,15 @@ fun Tube(balls: List<Int>, selected: Boolean, ball: Dp = 34.dp, onClick: (() -> 
 fun ColorSortGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
-    var tubes by remember(level) { mutableStateOf(newLevel(level, Random(level.toLong()))) }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
+    var tubes by remember(level) { mutableStateOf(newLevel(level, Random(mode.seedFor(level)))) }
     var history by remember(level) { mutableStateOf(listOf<Tubes>()) }
     var selected by remember(level) { mutableStateOf<Int?>(null) }
     val won = isSolved(tubes)
 
     fun restart() {
-        tubes = newLevel(level, Random(level.toLong())); history = emptyList(); selected = null
+        tubes = newLevel(level, Random(mode.seedFor(level))); history = emptyList(); selected = null
     }
 
     fun tap(i: Int) {
@@ -143,14 +145,14 @@ fun ColorSortGame(ads: Ads) {
     val canAddTube = tubes.size < colorsFor(level) + 4
     GameScaffold(
         ads, "COLOR SORT",
-        pills = listOf(Pill("LEVEL $level"), Pill("${history.size} MOVES")),
+        pills = listOf(Pill(mode.label(level)), Pill("${history.size} MOVES")),
         tools = listOf(
             Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) {
                 tubes = history.last(); history = history.dropLast(1); selected = null
             },
             Tool("Restart", GameIcons.Restart, onClick = ::restart),
         ),
-        hint = Hint("Extra tube", GameIcons.Plus, levelKey = level, enabled = canAddTube) { tubes = tubes + listOf(emptyList()) },
+        hint = Hint("Extra tube", GameIcons.Plus, levelKey = mode.hintKey(level), enabled = canAddTube) { tubes = tubes + listOf(emptyList()) },
     ) {
         // 4 tubes per row (5 with smaller balls on big levels); rows spaced so lifted balls never overlap.
         val perRow = if (tubes.size > 8) 5 else 4
@@ -168,11 +170,12 @@ fun ColorSortGame(ads: Ads) {
 
     if (won) {
         val stars = when { history.size <= colorsFor(level) * 4 -> 3; history.size <= colorsFor(level) * 6 -> 2; else -> 1 }
-        ResultDialog("Level complete", "Level: $level\nMoves: ${history.size}", "Next level", {
+        ResultDialog("Level complete", "Level: $level\nMoves: ${history.size}", if (mode.daily) "Done" else "Next level", {
             ads.levelDone()
-            store.put("stars", store.get("stars") + stars)
-            level++
-            store.put("level", level)
+            mode.win(store, level, stars) {
+                level++
+                store.put("level", level)
+            }
         }, stars = stars)
     }
 }

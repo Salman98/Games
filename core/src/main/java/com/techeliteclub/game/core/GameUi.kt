@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,7 +50,14 @@ import androidx.compose.ui.unit.sp
 data class HomeInfo(val pill: String, val pillIsTrophy: Boolean, val label: String, val progress: Float?)
 
 /** Navigation the games can trigger without knowing about the activity. */
-class GameNav(val home: () -> Unit, val settings: () -> Unit)
+class GameNav(
+    val home: () -> Unit,
+    val settings: () -> Unit,
+    val daily: (() -> Unit)? = null, // null: game has no daily puzzle / level map
+    val map: (() -> Unit)? = null,
+    val themes: () -> Unit = {},
+    val more: () -> Unit = {},
+)
 
 val LocalNav = staticCompositionLocalOf { GameNav({}, {}) }
 
@@ -62,6 +70,9 @@ abstract class GameActivity : ComponentActivity() {
     abstract val logoLines: List<String>
     abstract val tagline: String
     open val hasHowTo: Boolean = false
+
+    /** Numbered levels: turns on the daily puzzle (which drives the streak) and the level map. */
+    open val hasLevels: Boolean = false
 
     @Composable
     abstract fun Hero()
@@ -99,9 +110,12 @@ abstract class GameActivity : ComponentActivity() {
         music = Music(this)
         val ads = Ads(this).also { it.start() }
         setContent {
-            val scheme = if (gameTheme.light) lightColorScheme(primary = gameTheme.primary[1]) else darkColorScheme(primary = gameTheme.primary[1])
+            var skin by remember { mutableStateOf(Skins.selected(store)) }
+            val theme = gameTheme.withSkin(skin)
+            val scheme = if (theme.light) lightColorScheme(primary = theme.primary[1]) else darkColorScheme(primary = theme.primary[1])
             CompositionLocalProvider(
-                LocalGameTheme provides gameTheme,
+                LocalGameTheme provides theme,
+                LocalSkin provides skin,
                 LocalDisplayFont provides rememberDisplayFont(),
                 LocalSounds provides sounds,
                 LocalHaptics provides haptics,
@@ -110,23 +124,57 @@ abstract class GameActivity : ComponentActivity() {
                 MaterialTheme(colorScheme = scheme) {
                     var screen by rememberSaveable { mutableStateOf("home") }
                     var showSettings by remember { mutableStateOf(false) }
-                    val nav = remember { GameNav(home = { screen = "home" }, settings = { showSettings = true }) }
-                    LaunchedEffect(screen) { if (screen == "play") Reminder.markPlayed(store) }
+                    var streakPopup by remember { mutableStateOf<Int?>(null) }
+                    val nav = remember {
+                        GameNav(
+                            home = { screen = "home" },
+                            settings = { showSettings = true },
+                            daily = if (hasLevels) ({ screen = "hub" }) else null,
+                            map = if (hasLevels) ({ screen = "map" }) else null,
+                            themes = { screen = "themes" },
+                            more = { screen = "more" },
+                        )
+                    }
+                    LaunchedEffect(screen) {
+                        if (screen == "play" || screen == "daily") Reminder.markPlayed(store)
+                        // Games without a daily puzzle keep the streak by playing at all.
+                        if (screen == "play" && !hasLevels) streakPopup = Streak.onPlayed(store)
+                    }
                     LaunchedEffect(settings.music) { if (settings.music) music?.start() else music?.pause() }
                     BackHandler(enabled = screen != "home" || showSettings) {
-                        if (showSettings) showSettings = false else screen = "home"
+                        when {
+                            showSettings -> showSettings = false
+                            screen == "daily" -> screen = "hub"
+                            else -> screen = "home"
+                        }
                     }
+                    val play = { screen = if (hasHowTo && !store.getBool("howto_seen", false)) "howto" else "play" }
                     CompositionLocalProvider(LocalNav provides nav) {
                         Box(Modifier.fillMaxSize()) {
                             when (screen) {
                                 "home" -> HomeScreen(
                                     logoLines, tagline, homeInfo(store), hero = { Hero() },
-                                    onPlay = { screen = if (hasHowTo && !store.getBool("howto_seen", false)) "howto" else "play" },
+                                    onPlay = play,
                                     onHowTo = if (hasHowTo) ({ screen = "howto" }) else null,
                                 )
                                 "howto" -> HowTo { store.putBool("howto_seen", true); screen = "play" }
+                                "hub" -> DailyScreen { screen = "daily" }
+                                "daily" -> {
+                                    val mode = remember {
+                                        PlayMode(daily = true, seed = Daily.seed()) {
+                                            Daily.markDone(store)
+                                            streakPopup = Streak.onPlayed(store)
+                                            screen = "hub"
+                                        }
+                                    }
+                                    CompositionLocalProvider(LocalPlayMode provides mode) { Game(ads) }
+                                }
+                                "map" -> LevelMapScreen(onPlay = play)
+                                "themes" -> ThemesScreen(ads) { skin = it }
+                                "more" -> MoreGamesScreen()
                                 else -> Game(ads)
                             }
+                            streakPopup?.let { StreakPopup(it) { streakPopup = null } }
                             if (showSettings) SettingsSheet(ads, settings) { showSettings = false }
                         }
                     }
@@ -210,13 +258,18 @@ fun GameScaffold(
                     // Saved, so leaving and re-entering the level does not give another free hint.
                     val usedKey = "free_hint_used_" + hint.levelKey
                     var freeUsed by remember(hint.levelKey) { mutableStateOf(store.getBool(usedKey, false)) }
+                    var bonus by remember { mutableIntStateOf(store.get("bonus_hints")) } // earned from streaks, any level
                     ToolButton(
                         hint.label, hint.icon, Modifier.weight(1f),
-                        enabled = hint.enabled && (!freeUsed || ads.rewardedReady),
+                        enabled = hint.enabled && (!freeUsed || bonus > 0 || ads.rewardedReady),
                         gold = true,
-                        badge = if (!freeUsed) "1 FREE" else "▶ AD",
+                        badge = when { !freeUsed -> "1 FREE"; bonus > 0 -> "+$bonus FREE"; else -> "▶ AD" },
                     ) {
-                        if (!freeUsed) { freeUsed = true; store.putBool(usedKey, true); hint.onHint() } else ads.showRewarded(hint.onHint)
+                        when {
+                            !freeUsed -> { freeUsed = true; store.putBool(usedKey, true); hint.onHint() }
+                            bonus > 0 -> { bonus--; store.put("bonus_hints", bonus); hint.onHint() }
+                            else -> ads.showRewarded(hint.onHint)
+                        }
                     }
                 }
             }

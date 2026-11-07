@@ -55,6 +55,8 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.cos
@@ -75,6 +77,8 @@ fun HomeScreen(
     val nav = LocalNav.current
     val settings = LocalSettings.current
     val feedback = rememberFeedback()
+    val store = rememberStore()
+    val streak = Streak.current(store)
     GameBackground {
         Column(Modifier.fillMaxSize().statusBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(
@@ -82,10 +86,16 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                GlassPill {
-                    if (info.pillIsTrophy) Icon(GameIcons.Trophy, null, tint = Color(0xFFFFD34D), modifier = Modifier.size(18.dp))
-                    else GoldIcon(GameIcons.StarGold, 20.dp)
-                    PillText(info.pill)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GlassPill {
+                        if (info.pillIsTrophy) Icon(GameIcons.Trophy, null, tint = Color(0xFFFFD34D), modifier = Modifier.size(18.dp))
+                        else GoldIcon(GameIcons.StarGold, 20.dp)
+                        PillText(info.pill)
+                    }
+                    GlassPill(Modifier.semantics(mergeDescendants = true) { contentDescription = "$streak day streak" }) {
+                        GoldIcon(GameIcons.Flame, 20.dp)
+                        PillText("$streak")
+                    }
                 }
                 GlassIconButton(GameIcons.Gear, "Settings") { feedback.tap(); nav.settings() }
             }
@@ -108,18 +118,38 @@ fun HomeScreen(
                     }
                 }
             }
-            Spacer(Modifier.height(22.dp))
+            val daily = nav.daily
+            if (daily != null) {
+                val done = Daily.doneToday(store)
+                Row(
+                    Modifier.padding(top = 14.dp).width(300.dp).glass(t, RoundedCornerShape(20.dp))
+                        .pressable(label = "Daily puzzle") { feedback.tap(); daily() }.padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Icon(GameIcons.Calendar, null, tint = Color(0xFFFFD34D), modifier = Modifier.size(26.dp))
+                    Column(Modifier.weight(1f)) {
+                        PillText("Daily puzzle")
+                        Text(if (done) "Done today ✓" else "Keep your streak alive", color = t.glassInk.copy(alpha = 0.75f), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Icon(GameIcons.Forward, null, tint = t.glassInk, modifier = Modifier.size(20.dp))
+                }
+            }
+            Spacer(Modifier.height(18.dp))
             PrimaryButton("PLAY", Modifier.width(270.dp), height = 82.dp, fontSize = 40.sp, icon = GameIcons.Play) { feedback.good(); onPlay() }
-            Row(Modifier.padding(top = 22.dp, bottom = 26.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+            Row(Modifier.padding(top = 18.dp, bottom = 22.dp).navigationBarsPadding(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                nav.map?.let { GlassIconButton(GameIcons.LevelMap, "Level map", 46.dp) { feedback.tap(); it() } }
+                GlassIconButton(GameIcons.Palette, "Themes", 46.dp) { feedback.tap(); nav.themes() }
+                GlassIconButton(GameIcons.Grid, "More games", 46.dp) { feedback.tap(); nav.more() }
                 if (settings != null) {
-                    GlassIconButton(if (settings.sound) GameIcons.Sound else GameIcons.SoundOff, if (settings.sound) "Sound on" else "Sound off", 54.dp) {
+                    GlassIconButton(if (settings.sound) GameIcons.Sound else GameIcons.SoundOff, if (settings.sound) "Sound on" else "Sound off", 46.dp) {
                         settings.switchSound(!settings.sound); feedback.tap()
                     }
-                    GlassIconButton(if (settings.music) GameIcons.Music else GameIcons.MusicOff, if (settings.music) "Music on" else "Music off", 54.dp) {
+                    GlassIconButton(if (settings.music) GameIcons.Music else GameIcons.MusicOff, if (settings.music) "Music on" else "Music off", 46.dp) {
                         settings.switchMusic(!settings.music); feedback.tap()
                     }
                 }
-                if (onHowTo != null) GlassIconButton(GameIcons.Help, "How to play", 54.dp) { feedback.tap(); onHowTo() }
+                if (onHowTo != null) GlassIconButton(GameIcons.Help, "How to play", 46.dp) { feedback.tap(); onHowTo() }
             }
         }
     }

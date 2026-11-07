@@ -21,6 +21,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Arrow
     override val logoLines = listOf("ARROW", "ESCAPE")
     override val tagline = "Clear the board, one arrow at a time."
+    override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)

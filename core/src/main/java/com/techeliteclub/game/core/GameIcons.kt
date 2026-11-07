@@ -56,6 +56,17 @@ object GameIcons {
     val Close = line("close", "M5 5l14 14M19 5L5 19", width = 3f)
     val Bell = line("bell", "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9", "M13.7 21a2 2 0 0 1-3.4 0")
     val Vibrate = line("vibrate", "M8 4h8v16H8z", "M4 8v8M20 8v8")
+    val Lock = line("lock", "M5 11h14v10H5z", "M8 11V7a4 4 0 0 1 8 0v4")
+    val Gift = line("gift", "M4 9h16v4H4zM6 13h12v8H6z", "M12 9v12M12 9C10 5 6 5 7.5 7.5 8.5 9 12 9 12 9zM12 9c2-4 6-4 4.5-1.5C15.5 9 12 9 12 9z")
+    val LevelMap = line("map", "M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z", "M9 4v14M15 6v14")
+    val Palette = line("palette", "M12 3a9 9 0 1 0 0 18c1.5 0 2-1 2-2s-1-1.5-1-2.5S14 15 15 15h2a4 4 0 0 0 4-4c0-4.4-4-8-9-8z", "M7.5 11.5h.01M9.5 7.5h.01M14.5 7.5h.01")
+    val Grid = line("grid", "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z")
+    val Calendar = line("calendar", "M4 6h16v15H4z", "M4 10h16M8 3v4M16 3v4")
+    val Flame = filled(
+        "flame",
+        "M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.5-4.5 2.5-5.5.3 2 1.2 3 2.2 3.3C10 9 10.5 5 12 2z",
+        Brush.verticalGradient(listOf(Color(0xFFFFE07A), Color(0xFFFF8A1E), Color(0xFFE5321E)), startY = 2f, endY = 22f),
+    )
 
     val Play = filled("play", "M7 4.5v15a1 1 0 0 0 1.5.9l12-7.5a1 1 0 0 0 0-1.8l-12-7.5A1 1 0 0 0 7 4.5z", SolidColor(Color.White))
     val Heart = filled(

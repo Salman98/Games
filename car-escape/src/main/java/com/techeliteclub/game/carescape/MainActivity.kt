@@ -21,6 +21,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Car
     override val logoLines = listOf("CAR", "ESCAPE")
     override val tagline = "Slide the cars. Free the red one."
+    override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)
