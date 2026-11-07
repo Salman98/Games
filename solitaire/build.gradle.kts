@@ -5,9 +5,9 @@ plugins {
 }
 
 android {
-    namespace = "com.salman98.games.solitaire"
+    namespace = "com.techeliteclub.game.solitaire"
     defaultConfig {
-        applicationId = "com.salman98.games.solitaire" // cannot change after the first Play upload
+        applicationId = "com.techeliteclub.game.solitaire" // cannot change after the first Play upload
         versionCode = 1
         versionName = "1.0"
     }
