@@ -27,6 +27,18 @@ subprojects {
                 sourceCompatibility = JavaVersion.VERSION_17
                 targetCompatibility = JavaVersion.VERSION_17
             }
+            // Release signing from keystore.properties in the repo root (git-ignored); without it, release builds stay unsigned.
+            val keystore = rootProject.file("keystore.properties")
+            if (keystore.exists()) {
+                val p = java.util.Properties().apply { keystore.inputStream().use { load(it) } }
+                signingConfigs.create("release") {
+                    storeFile = rootProject.file(p.getProperty("storeFile")) // absolute path, or relative to the repo root
+                    storePassword = p.getProperty("storePassword")
+                    keyAlias = p.getProperty("keyAlias")
+                    keyPassword = p.getProperty("keyPassword")
+                }
+                buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
+            }
             buildTypes.getByName("release") {
                 isMinifyEnabled = true
                 isShrinkResources = true
