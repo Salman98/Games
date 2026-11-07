@@ -39,6 +39,7 @@ import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.ResultDialog
 import com.techeliteclub.game.core.Tool
@@ -84,8 +85,9 @@ fun CarBody(color: Color, horizontal: Boolean, w: Dp, h: Dp, hero: Boolean, modi
 fun CarEscapeGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
-    val start = remember(level) { newLevel(level, Random(level.toLong())) }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
+    val start = remember(level) { newLevel(level, Random(mode.seedFor(level))) }
     val par = remember(start) { solve(start)?.size ?: 0 } // fewest moves possible
     var cars by remember(level) { mutableStateOf(start) }
     var history by remember(level) { mutableStateOf(listOf<List<Car>>()) }
@@ -101,12 +103,12 @@ fun CarEscapeGame(ads: Ads) {
 
     GameScaffold(
         ads, "CAR ESCAPE",
-        pills = listOf(Pill("LEVEL $level"), Pill("MOVES $moves"), Pill("PAR $par", GameIcons.StarGold, gold = true)),
+        pills = listOf(Pill(mode.label(level)), Pill("MOVES $moves"), Pill("PAR $par", GameIcons.StarGold, gold = true)),
         tools = listOf(
             Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { cars = history.last(); history = history.dropLast(1) },
             Tool("Restart", GameIcons.Restart) { cars = start; history = emptyList() },
         ),
-        hint = Hint("Next move", GameIcons.Bulb, levelKey = level) { solve(cars)?.firstOrNull()?.let(::play) },
+        hint = Hint("Next move", GameIcons.Bulb, levelKey = mode.hintKey(level)) { solve(cars)?.firstOrNull()?.let(::play) },
     ) {
         Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 10.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -137,11 +139,12 @@ fun CarEscapeGame(ads: Ads) {
 
     if (won) {
         val stars = when { moves <= par -> 3; moves <= par + 3 -> 2; else -> 1 }
-        ResultDialog("Escaped!", "Level: $level\nMoves: $moves (par $par)", "Next level", {
+        ResultDialog("Escaped!", "Level: $level\nMoves: $moves (par $par)", if (mode.daily) "Done" else "Next level", {
             ads.levelDone()
-            store.put("stars", store.get("stars") + stars)
-            level++
-            store.put("level", level)
+            mode.win(store, level, stars) {
+                level++
+                store.put("level", level)
+            }
         }, stars = stars)
     }
 }

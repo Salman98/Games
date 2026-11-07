@@ -42,6 +42,7 @@ import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.ResultDialog
 import com.techeliteclub.game.core.Tool
@@ -64,8 +65,9 @@ fun WordSearchGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
     val t = LocalGameTheme.current
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
-    val puzzle = remember(level) { newPuzzle(level, Random(level.toLong())) }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
+    val puzzle = remember(level) { newPuzzle(level, Random(mode.seedFor(level))) }
     var found by remember(level) { mutableStateOf(listOf<String>()) }
     var start by remember(level) { mutableStateOf<Int?>(null) }
     var current by remember(level) { mutableStateOf<Int?>(null) }
@@ -83,9 +85,9 @@ fun WordSearchGame(ads: Ads) {
 
     GameScaffold(
         ads, "WORD SEARCH",
-        pills = listOf(Pill("LEVEL $level"), Pill("${found.size} / ${words.size} WORDS")),
+        pills = listOf(Pill(mode.label(level)), Pill("${found.size} / ${words.size} WORDS")),
         tools = listOf(Tool("Restart", GameIcons.Restart) { found = emptyList(); start = null; current = null; hinted = null }),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = level) {
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level)) {
             hinted = words.firstOrNull { it !in found }?.let { puzzle.placed.getValue(it).first() }
         },
     ) {
@@ -159,11 +161,12 @@ fun WordSearchGame(ads: Ads) {
     }
 
     if (found.size == words.size) {
-        ResultDialog("All words found", "Level: $level\nWords: ${words.size}", "Next level", {
+        ResultDialog("All words found", "Level: $level\nWords: ${words.size}", if (mode.daily) "Done" else "Next level", {
             ads.levelDone()
-            store.put("stars", store.get("stars") + 3)
-            level++
-            store.put("level", level)
+            mode.win(store, level, 3) {
+                level++
+                store.put("level", level)
+            }
         })
     }
 }

@@ -36,6 +36,7 @@ import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.ResultDialog
 import com.techeliteclub.game.core.Tool
@@ -67,8 +68,9 @@ fun TileMahjongGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
     val rng = remember { Random(System.nanoTime()) }
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
-    val start = remember(level) { newLevel(level, Random(level.toLong())).tiles }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
+    val start = remember(level) { newLevel(level, Random(mode.seedFor(level))).tiles }
     var tiles by remember(level) { mutableStateOf(start) }
     var history by remember(level) { mutableStateOf(listOf<Tiles>()) }
     var selected by remember(level) { mutableStateOf<Pos?>(null) }
@@ -93,12 +95,12 @@ fun TileMahjongGame(ads: Ads) {
 
     GameScaffold(
         ads, "TILE MAHJONG",
-        pills = listOf(Pill("LEVEL $level"), Pill("${tiles.size} TILES · $available MATCHES")),
+        pills = listOf(Pill(mode.label(level)), Pill("${tiles.size} TILES · $available MATCHES")),
         tools = listOf(
             Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { tiles = history.last(); history = history.dropLast(1); selected = null },
             Tool("Shuffle", GameIcons.Shuffle, enabled = tiles.isNotEmpty()) { tiles = shuffle(tiles, rng); selected = null; hint = null },
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = level) { hint = freePairs(tiles).firstOrNull() },
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level)) { hint = freePairs(tiles).firstOrNull() },
     ) {
         Bezel(Modifier.fillMaxWidth().height(400.dp), padding = 10.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -127,11 +129,12 @@ fun TileMahjongGame(ads: Ads) {
     }
 
     when {
-        tiles.isEmpty() -> ResultDialog("Table cleared", "Level: $level", "Next level", {
+        tiles.isEmpty() -> ResultDialog("Table cleared", "Level: $level", if (mode.daily) "Done" else "Next level", {
             ads.levelDone()
-            store.put("stars", store.get("stars") + 3)
-            level++
-            store.put("level", level)
+            mode.win(store, level, 3) {
+                level++
+                store.put("level", level)
+            }
         })
         stuck -> ResultDialog(
             "No matches left", "Shuffle the tiles or start the level again.", "Restart", { ads.levelDone(); restart() },

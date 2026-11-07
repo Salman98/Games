@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
 import com.techeliteclub.game.core.Bezel
-import com.techeliteclub.game.core.GEMS
+import com.techeliteclub.game.core.activeGems
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.GradientText
@@ -173,7 +173,7 @@ fun BlockPuzzleGame(ads: Ads) {
                                         tap.size(cell).padding(2.dp).background(Color(0x59D6A8FF), TILE).border(2.dp, Color(0xFFE6C9FF), TILE)
                                     )
                                     v != 0 -> Box(
-                                        tap.size(cell).padding(2.dp).gem(GEMS[v - 1].first, GEMS[v - 1].second, 7.dp)
+                                        tap.size(cell).padding(2.dp).gem(activeGems[v - 1].first, activeGems[v - 1].second, 7.dp)
                                             .then(if (i in willClear) Modifier.border(2.dp, Color(0xFFFFF2A0), TILE) else Modifier)
                                     )
                                     else -> Box(tap.size(cell).padding(2.dp).background(Color.White.copy(alpha = 0.05f), TILE))
@@ -228,7 +228,7 @@ fun BlockPuzzleGame(ads: Ads) {
             val topLeft = finger - rootOrigin - Offset(w / 2, h + liftPx)
             Box(Modifier.offset { IntOffset(topLeft.x.roundToInt(), topLeft.y.roundToInt()) }) {
                 for ((r, c) in dragged.cells) {
-                    Box(Modifier.offset(cell * c, cell * r).size(cell).padding(2.dp).gem(GEMS[dragged.color - 1].first, GEMS[dragged.color - 1].second, 7.dp))
+                    Box(Modifier.offset(cell * c, cell * r).size(cell).padding(2.dp).gem(activeGems[dragged.color - 1].first, activeGems[dragged.color - 1].second, 7.dp))
                 }
             }
         }
@@ -264,7 +264,7 @@ private fun PieceView(
             val w = p.cells.maxOf { it.second } + 1
             Box(Modifier.size(mini * w, mini * h)) {
                 for ((r, c) in p.cells) {
-                    Box(Modifier.offset(mini * c, mini * r).size(mini).padding(1.5.dp).gem(GEMS[p.color - 1].first, GEMS[p.color - 1].second, 5.dp))
+                    Box(Modifier.offset(mini * c, mini * r).size(mini).padding(1.5.dp).gem(activeGems[p.color - 1].first, activeGems[p.color - 1].second, 5.dp))
                 }
             }
         }

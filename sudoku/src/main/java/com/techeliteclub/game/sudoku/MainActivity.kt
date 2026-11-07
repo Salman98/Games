@@ -31,6 +31,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Sudoku
     override val logoLines = listOf("SUDOKU")
     override val tagline = "Calm logic. Daily focus."
+    override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)

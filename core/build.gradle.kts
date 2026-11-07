@@ -15,4 +15,5 @@ dependencies {
     implementation(libs.ump)
     implementation(libs.play.review) // in-app "rate this app" popup
     implementation(libs.work.runtime) // daily reminder
+    testImplementation(libs.junit)
 }

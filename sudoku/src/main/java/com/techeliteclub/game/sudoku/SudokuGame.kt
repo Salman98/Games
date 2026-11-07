@@ -43,6 +43,7 @@ import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.Hint
+import com.techeliteclub.game.core.LocalPlayMode
 import com.techeliteclub.game.core.Pill
 import com.techeliteclub.game.core.ResultDialog
 import com.techeliteclub.game.core.Tool
@@ -62,8 +63,9 @@ private class Step(val grid: IntArray, val notes: Map<Int, Set<Int>>)
 fun SudokuGame(ads: Ads) {
     val store = rememberStore()
     val feedback = rememberFeedback()
-    var level by remember { mutableIntStateOf(store.get("level", 1)) }
-    val puzzle = remember(level) { newPuzzle(level, Random(level.toLong())) }
+    val mode = LocalPlayMode.current
+    var level by remember { mutableIntStateOf(mode.startLevel(store)) }
+    val puzzle = remember(level) { newPuzzle(level, Random(mode.seedFor(level))) }
     var grid by remember(level) { mutableStateOf(puzzle.givens.copyOf()) }
     var notes by remember(level) { mutableStateOf(mapOf<Int, Set<Int>>()) }
     var history by remember(level) { mutableStateOf(listOf<Step>()) }
@@ -109,7 +111,7 @@ fun SudokuGame(ads: Ads) {
 
     GameScaffold(
         ads, "SUDOKU",
-        pills = listOf(Pill("LEVEL $level"), Pill("✕ $mistakes"), Pill(time(seconds), GameIcons.Clock)),
+        pills = listOf(Pill(mode.label(level)), Pill("✕ $mistakes"), Pill(time(seconds), GameIcons.Clock)),
         tools = listOf(
             Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) {
                 val last = history.last(); grid = last.grid; notes = last.notes; history = history.dropLast(1)
@@ -117,7 +119,7 @@ fun SudokuGame(ads: Ads) {
             Tool("Erase", GameIcons.Erase) { selected?.let { put(it, 0) } },
             Tool(if (noteMode) "Notes ON" else "Notes", GameIcons.Pencil) { noteMode = !noteMode },
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = level, onHint = ::hint),
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), onHint = ::hint),
     ) {
         Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 4.dp, radius = 24.dp) {
             BoxWithConstraints(Modifier.fillMaxSize().clip(RoundedCornerShape(14.dp))) {
@@ -195,11 +197,12 @@ fun SudokuGame(ads: Ads) {
 
     if (won) {
         val stars = when (mistakes) { 0 -> 3; 1, 2 -> 2; else -> 1 }
-        ResultDialog("Solved!", "Level: $level\nTime: ${time(seconds)}\nMistakes: $mistakes", "Next level", {
+        ResultDialog("Solved!", "Level: $level\nTime: ${time(seconds)}\nMistakes: $mistakes", if (mode.daily) "Done" else "Next level", {
             ads.levelDone()
-            store.put("stars", store.get("stars") + stars)
-            level++
-            store.put("level", level)
+            mode.win(store, level, stars) {
+                level++
+                store.put("level", level)
+            }
         }, stars = stars)
     }
 }

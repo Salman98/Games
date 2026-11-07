@@ -26,6 +26,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Word
     override val logoLines = listOf("WORD", "SEARCH")
     override val tagline = "Find every hidden word."
+    override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)

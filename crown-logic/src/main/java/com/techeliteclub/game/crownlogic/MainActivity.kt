@@ -40,6 +40,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Crown
     override val logoLines = listOf("CROWN", "LOGIC")
     override val tagline = "One crown per row, column & colour."
+    override val hasLevels = true
     override val hasHowTo = true
 
     override fun homeInfo(store: GameStore): HomeInfo {

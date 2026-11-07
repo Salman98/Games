@@ -5,6 +5,20 @@
     <!-- Daily "your puzzle is waiting" reminder (asked on the second launch, Android 13+). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- "More games": see which sister games are installed (Android 11+ package visibility). -->
+    <queries>
+        <package android:name="com.techeliteclub.game.blockpuzzle" />
+        <package android:name="com.techeliteclub.game.colorsort" />
+        <package android:name="com.techeliteclub.game.crownlogic" />
+        <package android:name="com.techeliteclub.game.arrowescape" />
+        <package android:name="com.techeliteclub.game.tilemahjong" />
+        <package android:name="com.techeliteclub.game.sudoku" />
+        <package android:name="com.techeliteclub.game.wordsearch" />
+        <package android:name="com.techeliteclub.game.solitaire" />
+        <package android:name="com.techeliteclub.game.carescape" />
+        <package android:name="com.techeliteclub.game.merge2048" />
+    </queries>
+
     <application>
         <!-- Each game can override @string/admob_app_id with its real AdMob app ID. -->
         <meta-data

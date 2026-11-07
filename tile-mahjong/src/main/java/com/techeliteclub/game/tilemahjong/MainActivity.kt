@@ -18,6 +18,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Mahjong
     override val logoLines = listOf("TILE", "MAHJONG")
     override val tagline = "Match the free tiles. Clear the table."
+    override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)
