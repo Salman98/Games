@@ -5,9 +5,9 @@ plugins {
 }
 
 android {
-    namespace = "com.techeliteclub.blockpuzzle"
+    namespace = "com.techeliteclub.game.blockpuzzle"
     defaultConfig {
-        applicationId = "com.techeliteclub.blockpuzzle" // cannot change after the first Play upload
+        applicationId = "com.techeliteclub.game.blockpuzzle" // cannot change after the first Play upload
         versionCode = 1
         versionName = "1.0"
     }

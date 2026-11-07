@@ -5,9 +5,9 @@ plugins {
 }
 
 android {
-    namespace = "com.techeliteclub.arrowescape"
+    namespace = "com.techeliteclub.game.arrowescape"
     defaultConfig {
-        applicationId = "com.techeliteclub.arrowescape" // cannot change after the first Play upload
+        applicationId = "com.techeliteclub.game.arrowescape" // cannot change after the first Play upload
         versionCode = 1
         versionName = "1.0"
     }
