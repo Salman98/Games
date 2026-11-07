@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Block Grid Puzzle</string>
-    <color name="game_color">#E65100</color>
 </resources>

@@ -48,7 +48,7 @@ Data safety answers (current code):
 - Encrypted in transit: Yes. No account exists; progress stays on the device.
 - Not collected: name, email, precise location, contacts, photos, payments.
 - No accounts in the games, so the account-deletion question is "No, users cannot create an account".
-- If you add Crashlytics/Analytics later (section 5), add Crash logs + Analytics here.
+- Firebase Analytics + Crashlytics: same types as above (app interactions, crash logs, diagnostics, approximate location, **Device or other IDs** = Firebase instance ID). Purpose: Analytics, App functionality. Not shared.
 
 ## 3. AdMob
 
@@ -93,8 +93,8 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 ## 5. Optional, later (tell me when done, I wire the code)
 
 - [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder (no database or sign-in: not needed)
-- [ ] (Later) Analytics + Crashlytics: tell me, I add them
-- [x] Update `privacy.html` if Crashlytics or Analytics is added
+- [x] Analytics + Crashlytics added (data shows in Firebase console → Analytics / Crashlytics after the first runs)
+- [ ] Re-upload `privacy.html` to your site (now covers Analytics + Crashlytics)
 
 ## 6. Before pressing Publish (per game)
 

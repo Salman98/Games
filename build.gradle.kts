@@ -9,13 +9,17 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
 
 // Settings shared by every game, so each game's build.gradle.kts only names itself.
 subprojects {
     plugins.withId("com.android.application") {
-        // Firebase config (for Crashlytics/Analytics later) applies per game once its google-services.json is added.
-        if (file("google-services.json").exists()) apply(plugin = "com.google.gms.google-services")
+        // Firebase (Analytics + Crashlytics) per game, from its google-services.json.
+        if (file("google-services.json").exists()) {
+            apply(plugin = "com.google.gms.google-services")
+            apply(plugin = "com.google.firebase.crashlytics")
+        }
         extensions.configure<ApplicationExtension> {
             compileSdk = 36
             defaultConfig {

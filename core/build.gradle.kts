@@ -15,5 +15,8 @@ dependencies {
     implementation(libs.ump)
     implementation(libs.play.review) // in-app "rate this app" popup
     implementation(libs.work.runtime) // daily reminder
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics) // screen/session stats in the Firebase console
+    implementation(libs.firebase.crashlytics) // crash reports
     testImplementation(libs.junit)
 }
