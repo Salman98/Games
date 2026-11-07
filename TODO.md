@@ -86,7 +86,7 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 
 - [ ] Create one upload key (keep the file + passwords in 2 safe places, losing it blocks updates):
       `keytool -genkeypair -v -keystore techeliteclub-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000`
-- [ ] Build signed AABs in Android Studio: Build → Generate Signed App Bundle (or ask me to add a `keystore.properties` signing config)
+- [ ] Put `keystore.properties` in the repo root (git ignores it), then `./gradlew :<module>:bundleRelease` gives a signed AAB in `<module>/build/outputs/bundle/release/`
 - [ ] Accept **Play App Signing** on the first upload of each app
 - [ ] Never commit the `.jks` file to git
 
@@ -94,8 +94,7 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 
 - [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder (no database or sign-in: not needed)
 - [ ] (Later) Analytics + Crashlytics: tell me, I add them
-- [ ] **Play Games Services** (leaderboards / sign-in): in Play Console → Play Games Services → create per game, add leaderboards (Block Grid: Best score, 2048: Best score, others: Stars), send me the game IDs + leaderboard IDs
-- [x] Update `privacy.html` if Crashlytics, Analytics or Play Games is added
+- [x] Update `privacy.html` if Crashlytics or Analytics is added
 
 ## 6. Before pressing Publish (per game)
 
@@ -103,4 +102,4 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 - [ ] Consent form appears when using a VPN set to an EU country
 - [ ] Notification permission asked on second launch; reminder arrives
 - [ ] Real ad IDs in that game's `ads.xml` (not the `3940256099942544` test IDs)
-- [ ] Font: `core/src/main/assets/fonts/LilitaOne-Regular.ttf` present (see the README in that folder)
+- [x] Font: `core/src/main/assets/fonts/LilitaOne-Regular.ttf` present (see the README in that folder)
