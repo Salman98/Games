@@ -20,7 +20,10 @@ $FB login:list | grep -q "@" || $FB login
 $FB use "$PROJECT"
 
 # Debug keystore SHA-1, so Google Sign-In works in debug builds. Add release + Play App Signing SHA-1s later (see README).
-DEBUG_SHA1=$(keytool -list -v -alias androiddebugkey -keystore "$HOME/.android/debug.keystore" -storepass android 2>/dev/null | awk '/SHA1:/ {print $2}')
+# On Windows keytool is usually only inside Android Studio's bundled JDK.
+KEYTOOL=$(command -v keytool || echo "/c/Program Files/Android/Android Studio/jbr/bin/keytool")
+DEBUG_SHA1=$("$KEYTOOL" -list -v -alias androiddebugkey -keystore "$HOME/.android/debug.keystore" -storepass android 2>/dev/null | awk '/SHA1:/ {print $2}' || true)
+[ -n "$DEBUG_SHA1" ] || echo "WARNING: no debug keystore SHA-1 found (build any game once in Android Studio, then re-run)."
 
 EXISTING=$($FB apps:list ANDROID --project "$PROJECT" --json)
 while IFS='|' read -r dir name pkg; do
