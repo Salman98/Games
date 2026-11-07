@@ -52,10 +52,10 @@ Data safety answers (current code):
 
 ## 3. AdMob
 
-- [ ] Create AdMob account (same Google account as Play), add payment + tax info (Malaysia: W-8BEN)
-- [ ] Add 10 apps (Android, "not published yet"); link each to Play after it goes live
-- [ ] Per app create 3 ad units: **Banner**, **Interstitial**, **Rewarded** (rewarded: 1 reward, item "hint")
-- [ ] **G-rated ads only** (backup; the code already asks for G):
+- [x] Create AdMob account (same Google account as Play), add payment + tax info (Malaysia: W-8BEN)
+- [x] Add 10 apps (Android, "not published yet"); link each to Play after it goes live
+- [x] Per app create 3 ad units: **Banner**, **Interstitial**, **Rewarded** (rewarded: 1 reward, item "hint")
+- [x] **G-rated ads only** (backup; the code already asks for G):
   - AdMob → **Blocking controls** → **All apps** → **Max ad content rating** → choose **G** → Save
   - Same page → **Sensitive categories** → block gambling, dating, alcohol, politics, religion
 - [ ] **Consent message** (the "Allow personalised ads?" popup for EU/UK players; the app shows it only after you publish it here):
@@ -63,8 +63,8 @@ Data safety answers (current code):
   - Select all 10 apps, keep the default text, add your privacy page URL → **Publish**
   - Repeat under **US state regulations** → Create message → all 10 apps → **Publish**
   - Menu names may differ slightly if Google renames them; look for the closest match
-- [ ] Settings → copy your **publisher ID** (`pub-XXXXXXXXXXXXXXXX`) into `website/app-ads.txt`, then upload it (section 1)
-- [ ] Never tap your own live ads; use test ads while developing
+- [x] Settings → copy your **publisher ID** (`pub-XXXXXXXXXXXXXXXX`) into `website/app-ads.txt`, then upload it (section 1)
+- [x] Never tap your own live ads; use test ads while developing
 - [x] Fill this table and send it to me (done, ids are in each `<module>/src/main/res/values/ads.xml`) (I put each row into `<module>/src/main/res/values/ads.xml`):
 
 | Module | App ID (`~`) | Banner (`/`) | Interstitial (`/`) | Rewarded (`/`) |
@@ -95,7 +95,7 @@ Or do it yourself: copy `core/src/main/res/values/ads.xml` to `<module>/src/main
 - [x] **Firebase** project `techeliteclub-games`, 10 apps, `google-services.json` in each game folder (no database or sign-in: not needed)
 - [ ] (Later) Analytics + Crashlytics: tell me, I add them
 - [ ] **Play Games Services** (leaderboards / sign-in): in Play Console → Play Games Services → create per game, add leaderboards (Block Grid: Best score, 2048: Best score, others: Stars), send me the game IDs + leaderboard IDs
-- [ ] Update `privacy.html` if Crashlytics, Analytics or Play Games is added
+- [x] Update `privacy.html` if Crashlytics, Analytics or Play Games is added
 
 ## 6. Before pressing Publish (per game)
 
