@@ -61,4 +61,14 @@ class LogicTest {
             assertEquals(52, all(b).map { it.rank to it.suit }.toSet().size)
         }
     }
+
+    @Test
+    fun autoFinishWinsWhenAllCardsAreUp() {
+        // Every card face up, spread over tableau and stock: always finishable.
+        val deck = (0 until 4).flatMap { s -> (1..13).map { Card(it, s, true) } }.shuffled(Random(5))
+        val tableau = List(7) { col -> deck.drop(col * 4).take(4).sortedByDescending { it.rank } }
+        val b = Board(deck.drop(28).map { it.copy(up = false) }, emptyList(), List(4) { emptyList() }, tableau)
+        assertTrue(canAutoFinish(b))
+        assertTrue(isWon(autoFinish(b)))
+    }
 }

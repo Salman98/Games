@@ -26,6 +26,7 @@ class LogicTest {
         assertEquals(2, res.linesCleared)
         assertTrue(res.board.all { it == 0 })
         assertEquals(1 + 40, res.points)
+        assertEquals(15, res.cleared.size) // row + column share the corner
     }
 
     @Test

@@ -90,3 +90,20 @@ fun allSources(b: Board): List<Source> =
 fun hint(b: Board): Source? = allSources(b).firstOrNull { it !is Source.Foundation && autoMove(b, it) != null }
 
 fun isWon(b: Board) = b.foundations.all { it.size == 13 }
+
+/** True once every tableau card is face up: the game can then be finished automatically. */
+fun canAutoFinish(b: Board) = !isWon(b) && b.tableau.all { pile -> pile.all { it.up } }
+
+/** Moves everything home (drawing from the stock when needed). Use only when [canAutoFinish]. */
+fun autoFinish(start: Board): Board {
+    var b = start
+    repeat(1000) {
+        if (isWon(b)) return b
+        val home = allSources(b).firstNotNullOfOrNull { src ->
+            if (src is Source.Foundation) null
+            else cardsAt(b, src)?.takeIf { it.size == 1 && fitsFoundation(b, it[0]) }?.let { autoMove(b, src) }
+        }
+        b = home ?: draw(b)
+    }
+    return b
+}
