@@ -32,7 +32,7 @@ subprojects {
             if (keystore.exists()) {
                 val p = java.util.Properties().apply { keystore.inputStream().use { load(it) } }
                 signingConfigs.create("release") {
-                    storeFile = rootProject.file(p.getProperty("storeFile")) // absolute path, or relative to the repo root
+                    storeFile = rootProject.file(p.getProperty("storeFile").trim()) // absolute path, or relative to the repo root
                     storePassword = p.getProperty("storePassword")
                     keyAlias = p.getProperty("keyAlias")
                     keyPassword = p.getProperty("keyPassword")
