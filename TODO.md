@@ -35,7 +35,7 @@ Build one game's release bundle: `./gradlew :block-puzzle:bundleRelease` (swap t
 - [ ] App content → Ads = **Yes, contains ads**
 - [ ] App content → Target audience = **13–15, 16–17, 18+** (no under-13 boxes); "Appeals to children" = No
 - [ ] App content → Content rating questionnaire (puzzle, no violence/gambling) → expect Everyone / PEGI 3
-- [ ] App content → Data safety (answers below)
+- [ ] App content → Data safety: Play Console → your app → **Policy → App content** → **Data safety** → fill with the answers below (once per app)
 - [ ] App content → Government app No, Financial features No, Health No, News No
 - [ ] App content → Advertising ID: **Yes, used for advertising** (AdMob)
 - [ ] Store listing: short description (≤80 chars), full description, icon 512×512 PNG, feature graphic 1024×500, at least 4 phone screenshots
@@ -54,8 +54,14 @@ Data safety answers (current code):
 - [ ] Create AdMob account (same Google account as Play), add payment + tax info (Malaysia: W-8BEN)
 - [ ] Add 10 apps (Android, "not published yet"); link each to Play after it goes live
 - [ ] Per app create 3 ad units: **Banner**, **Interstitial**, **Rewarded** (rewarded: 1 reward, item "hint")
-- [ ] Blocking controls → **Max ad content rating: G**; block sensitive categories (gambling, dating, alcohol, politics, religion)
-- [ ] Privacy & messaging → create & **publish** the GDPR consent message and the US states message for all 10 apps (the app already shows them via UMP)
+- [ ] **G-rated ads only** (backup; the code already asks for G):
+  - AdMob → **Blocking controls** → **All apps** → **Max ad content rating** → choose **G** → Save
+  - Same page → **Sensitive categories** → block gambling, dating, alcohol, politics, religion
+- [ ] **Consent message** (the "Allow personalised ads?" popup for EU/UK players; the app shows it only after you publish it here):
+  - AdMob → **Privacy & messaging** → **European regulations** → **Create message**
+  - Select all 10 apps, keep the default text, add your privacy page URL → **Publish**
+  - Repeat under **US state regulations** → Create message → all 10 apps → **Publish**
+  - Menu names may differ slightly if Google renames them; look for the closest match
 - [ ] Settings → copy your **publisher ID** (`pub-XXXXXXXXXXXXXXXX`) into `website/app-ads.txt`, then upload it (section 1)
 - [ ] Never tap your own live ads; use test ads while developing
 - [ ] Fill this table and send it to me (I put each row into `<module>/src/main/res/values/ads.xml`):
