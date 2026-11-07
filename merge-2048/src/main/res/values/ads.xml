@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Real AdMob ids for merge2048; overrides core's test ids. Debug builds still load test ads (Ads.kt). -->
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-5631731994665734~7186667866</string>
+    <string name="ad_banner_id" translatable="false">ca-app-pub-5631731994665734/8633666819</string>
+    <string name="ad_interstitial_id" translatable="false">ca-app-pub-5631731994665734/4560504529</string>
+    <string name="ad_rewarded_id" translatable="false">ca-app-pub-5631731994665734/8075263615</string>
+</resources>

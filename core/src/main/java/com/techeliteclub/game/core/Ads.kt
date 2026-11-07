@@ -1,6 +1,7 @@
 package com.techeliteclub.game.core
 
 import android.app.Activity
+import android.content.pm.ApplicationInfo
 import android.os.SystemClock
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -44,6 +45,10 @@ class Ads(private val activity: Activity) {
     private var levelsDone = 0
     private var lastInterstitialAt = 0L
 
+    // Debug builds always use Google's test units, so your own taps never count as invalid clicks.
+    private val debug = activity.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+    private fun unit(real: Int, test: String) = if (debug) test else activity.getString(real)
+
     fun start() {
         consent.requestConsentInfoUpdate(activity, ConsentRequestParameters.Builder().build(), {
             UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) {
@@ -79,7 +84,7 @@ class Ads(private val activity: Activity) {
     private fun loadRewarded() {
         if (!ready || rewarded != null || loadingRewarded) return
         loadingRewarded = true
-        RewardedAd.load(activity, activity.getString(R.string.ad_rewarded_id), request(),
+        RewardedAd.load(activity, unit(R.string.ad_rewarded_id, "ca-app-pub-3940256099942544/5224354917"), request(),
             object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     loadingRewarded = false; rewarded = ad; rewardedReady = true
@@ -93,7 +98,7 @@ class Ads(private val activity: Activity) {
     private fun loadInterstitial() {
         if (!ready || interstitial != null || loadingInterstitial) return
         loadingInterstitial = true
-        InterstitialAd.load(activity, activity.getString(R.string.ad_interstitial_id), request(),
+        InterstitialAd.load(activity, unit(R.string.ad_interstitial_id, "ca-app-pub-3940256099942544/1033173712"), request(),
             object : InterstitialAdLoadCallback() {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     loadingInterstitial = false; interstitial = ad
@@ -142,7 +147,7 @@ class Ads(private val activity: Activity) {
             factory = { ctx ->
                 AdView(ctx).apply {
                     setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(ctx, widthDp))
-                    adUnitId = ctx.getString(R.string.ad_banner_id)
+                    adUnitId = unit(R.string.ad_banner_id, "ca-app-pub-3940256099942544/9214589741")
                     loadAd(request())
                 }
             },

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Real AdMob ids for blockpuzzle; overrides core's test ids. Debug builds still load test ads (Ads.kt). -->
+<resources>
+    <string name="admob_app_id" translatable="false">ca-app-pub-5631731994665734~2896069065</string>
+    <string name="ad_banner_id" translatable="false">ca-app-pub-5631731994665734/9420134876</string>
+    <string name="ad_interstitial_id" translatable="false">ca-app-pub-5631731994665734/8729869737</string>
+    <string name="ad_rewarded_id" translatable="false">ca-app-pub-5631731994665734/3285971369</string>
+</resources>
