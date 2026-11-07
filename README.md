@@ -21,10 +21,37 @@ Kotlin + Jetpack Compose, AdMob ads (banner, rewarded, interstitial).
 Open the folder in Android Studio, or from a terminal:
 
 ```bash
-./gradlew :block-puzzle:installDebug      # run one game on a phone/emulator
-./gradlew :block-puzzle:bundleRelease     # Play Store bundle (.aab)
+./gradlew :block-puzzle:installDebug      # install one game on a phone/emulator
+./gradlew installDebug                    # install all 10 games
+./gradlew installDebug --continue         # all games; keep going if one fails, list failures at the end
+./gradlew :sudoku:installDebug :solitaire:installDebug   # only the games you name
+./gradlew :block-puzzle:bundleRelease     # Play Store bundle (.aab) for one game
+./gradlew bundleRelease                   # Play Store bundles for all games
 ./gradlew test                            # game-logic unit tests for all games
 ```
+
+On Windows PowerShell use `.\gradlew` instead of `./gradlew`.
+
+Open a game on the phone right after installing it:
+
+```bash
+adb shell monkey -p com.techeliteclub.game.blockpuzzle -c android.intent.category.LAUNCHER 1
+```
+
+Uninstall: `adb uninstall com.techeliteclub.game.blockpuzzle`. Module names and package names:
+
+| Module | Package |
+|---|---|
+| `block-puzzle` | `com.techeliteclub.game.blockpuzzle` |
+| `color-sort` | `com.techeliteclub.game.colorsort` |
+| `crown-logic` | `com.techeliteclub.game.crownlogic` |
+| `arrow-escape` | `com.techeliteclub.game.arrowescape` |
+| `tile-mahjong` | `com.techeliteclub.game.tilemahjong` |
+| `sudoku` | `com.techeliteclub.game.sudoku` |
+| `word-search` | `com.techeliteclub.game.wordsearch` |
+| `solitaire` | `com.techeliteclub.game.solitaire` |
+| `car-escape` | `com.techeliteclub.game.carescape` |
+| `merge-2048` | `com.techeliteclub.game.merge2048` |
 
 ## Layout
 
