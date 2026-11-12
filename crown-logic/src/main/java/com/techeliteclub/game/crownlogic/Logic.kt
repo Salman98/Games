@@ -115,3 +115,14 @@ fun conflicts(p: Puzzle, crowns: Collection<Int>): Set<Int> {
 }
 
 fun isSolved(p: Puzzle, crowns: Collection<Int>) = crowns.size == p.n && conflicts(p, crowns).isEmpty()
+
+/** Saved level as text: one digit per cell (0 empty, 1 mark, 2 crown), then the seconds played. */
+fun encodeGame(cells: IntArray, seconds: Int) = cells.joinToString("") + ";" + seconds
+
+/** Throws when the text is damaged or is for another board size. */
+fun decodeGame(text: String, n: Int): Pair<IntArray, Int> {
+    val (c, s) = text.split(";")
+    val cells = c.map { it.digitToInt() }.toIntArray()
+    require(cells.size == n * n && cells.all { it in 0..2 })
+    return cells to s.toInt()
+}

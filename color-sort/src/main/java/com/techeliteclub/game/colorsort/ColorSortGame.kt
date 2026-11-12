@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
 import com.techeliteclub.game.core.GlassPill
@@ -116,10 +118,13 @@ fun ColorSortGame(ads: Ads) {
     val feedback = rememberFeedback()
     val mode = LocalPlayMode.current
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
-    var tubes by remember(level) { mutableStateOf(newLevel(level, Random(mode.seedFor(level)))) }
-    var history by remember(level) { mutableStateOf(listOf<Tubes>()) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    val saved = remember(level) { slot.load { decodeStates(it, level) } }
+    var tubes by remember(level) { mutableStateOf(saved?.last() ?: newLevel(level, Random(mode.seedFor(level)))) }
+    var history by remember(level) { mutableStateOf(saved?.dropLast(1) ?: listOf<Tubes>()) }
     var selected by remember(level) { mutableStateOf<Int?>(null) }
     val won = isSolved(tubes)
+    LaunchedEffect(tubes, history, won) { if (won) slot.clear() else slot.save(encodeStates(history + listOf(tubes))) }
 
     fun restart() {
         tubes = newLevel(level, Random(mode.seedFor(level))); history = emptyList(); selected = null

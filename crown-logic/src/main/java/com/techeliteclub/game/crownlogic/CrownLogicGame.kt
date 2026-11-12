@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
@@ -99,7 +100,11 @@ fun RegionBoard(
                             edge(bottom, Offset(0f, this.size.height), Offset(this.size.width, this.size.height))
                             edge(left, Offset(0f, 0f), Offset(0f, this.size.height))
                             edge(right, Offset(this.size.width, 0f), Offset(this.size.width, this.size.height))
-                            if (i == hint) drawRect(Color.White.copy(alpha = 0.45f))
+                            if (i == hint) {
+                                drawRect(Color.White.copy(alpha = 0.45f))
+                                // Gold frame: the white wash alone was too faint to spot on light regions.
+                                drawRect(Color(0xFFFFC533), style = androidx.compose.ui.graphics.drawscope.Stroke(8.dp.toPx()))
+                            }
                         }
                         .then(if (onTap != null) Modifier.clickable { onTap(r, c) } else Modifier)
                         .semantics { contentDescription = "Row ${r + 1} column ${c + 1}, " + listOf("empty", "marked", "crown")[s] },
@@ -123,14 +128,18 @@ fun CrownLogicGame(ads: Ads) {
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val puzzle = remember(level) { newPuzzle(level, Random(mode.seedFor(level))) }
     val n = puzzle.n
-    var cells by remember(level) { mutableStateOf(IntArray(n * n)) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    val saved = remember(level) { slot.load { decodeGame(it, n) } }
+    var cells by remember(level) { mutableStateOf(saved?.first ?: IntArray(n * n)) }
     var history by remember(level) { mutableStateOf(listOf<IntArray>()) }
     var hintCell by remember(level) { mutableStateOf<Int?>(null) }
     val crowns = cells.indices.filter { cells[it] == CROWN }
     val bad = conflicts(puzzle, crowns)
     val won = isSolved(puzzle, crowns)
-    var seconds by remember(level) { mutableIntStateOf(0) }
+    var seconds by remember(level) { mutableIntStateOf(saved?.second ?: 0) }
     LaunchedEffect(level, won) { while (!won) { delay(1000); seconds++ } }
+    // shortcut: the clock is saved with each move, not each second; save on pause if players notice lost time.
+    LaunchedEffect(cells, won) { if (won) slot.clear() else slot.save(encodeGame(cells, seconds)) }
 
     fun change(next: IntArray) { history = (history + listOf(cells)).takeLast(100); cells = next }
 
@@ -159,7 +168,8 @@ fun CrownLogicGame(ads: Ads) {
             Tool("Clear ✕", GameIcons.Erase) { change(IntArray(n * n) { if (cells[it] == MARK) EMPTY else cells[it] }) },
             Tool("Restart", GameIcons.Restart) { change(IntArray(n * n)); hintCell = null; seconds = 0 },
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), onHint = ::hint),
+        // Off while a hint is still showing: another one would point at the same thing and waste the player's ad.
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), enabled = hintCell == null, onHint = ::hint),
     ) {
         Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 5.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {

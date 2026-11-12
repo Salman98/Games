@@ -37,3 +37,13 @@ fun move(t: Tubes, from: Int, to: Int): Tubes {
 fun isSolved(t: Tubes) = t.all { it.isEmpty() || (it.size == CAP && it.all { c -> c == it[0] }) }
 
 fun hasMoves(t: Tubes) = t.indices.any { a -> t.indices.any { b -> canMove(t, a, b) } }
+
+/** Saved level as text: every state from the first move to now (so undo and the move count survive), split by ';'. */
+fun encodeStates(states: List<Tubes>) = states.joinToString(";") { t -> t.joinToString("|") { it.joinToString(",") } }
+
+/** Throws when the text is damaged or does not hold exactly this level's balls. */
+fun decodeStates(text: String, level: Int): List<Tubes> {
+    val balls = (0 until colorsFor(level)).flatMap { c -> List(CAP) { c } }
+    return text.split(";").map { s -> s.split("|").map { tube -> if (tube.isEmpty()) emptyList() else tube.split(",").map { it.toInt() } } }
+        .onEach { t -> require(t.all { it.size <= CAP } && t.flatten().sorted() == balls) }
+}

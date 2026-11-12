@@ -53,4 +53,12 @@ class LogicTest {
         assertTrue(isSolved(listOf(List(CAP) { 0 }, emptyList())))
         assertFalse(isSolved(listOf(listOf(0, 0, 0), listOf(0))))
     }
+
+    @Test
+    fun savedStatesRoundTripAndRejectOtherLevels() {
+        val start = newLevel(1, Random(1))
+        val states = listOf(start, start + listOf(emptyList()))
+        assertEquals(states, decodeStates(encodeStates(states), 1))
+        assertTrue(runCatching { decodeStates(encodeStates(states), 9) }.isFailure)
+    }
 }

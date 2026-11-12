@@ -41,3 +41,14 @@ fun newLevel(level: Int, rng: Random): List<Dir?> {
     }
     return board
 }
+
+/** Saved level as text: one letter per cell ('.' = empty), then the lives left. */
+fun encodeGame(board: List<Dir?>, lives: Int) = board.joinToString("") { it?.name?.take(1) ?: "." } + ";" + lives
+
+/** Throws when the text is damaged or does not fit [start] (the level as dealt). */
+fun decodeGame(text: String, start: List<Dir?>): Pair<List<Dir?>, Int> {
+    val (cells, lives) = text.split(";")
+    require(cells.length == start.size)
+    val board = cells.mapIndexed { i, ch -> if (ch == '.') null else start[i].also { require(it != null && it.name[0] == ch) } }
+    return board to lives.toInt().also { require(it >= 0) }
+}

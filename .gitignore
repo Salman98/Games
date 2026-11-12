@@ -9,3 +9,6 @@ captures/
 *.jks
 *.keystore
 keystore.properties
+__pycache__/
+store/*/raw/
+store/_sample/

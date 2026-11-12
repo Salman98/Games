@@ -63,3 +63,20 @@ fun conflicts(g: IntArray): Set<Int> = (0 until 81).filter { i ->
 }.toSet()
 
 fun isSolved(g: IntArray, solution: IntArray) = g.contentEquals(solution)
+
+class SavedLevel(val grid: IntArray, val notes: Map<Int, Set<Int>>, val mistakes: Int, val seconds: Int)
+
+/** Saved level as text: "81 digits;cell:notes,cell:notes;mistakes;seconds". */
+fun encodeGame(grid: IntArray, notes: Map<Int, Set<Int>>, mistakes: Int, seconds: Int) =
+    grid.joinToString("") + ";" + notes.entries.joinToString(",") { (i, d) -> "$i:" + d.joinToString("") } + ";" + mistakes + ";" + seconds
+
+/** Throws when the text is damaged or does not fit [givens]. */
+fun decodeGame(text: String, givens: IntArray): SavedLevel {
+    val (g, n, m, s) = text.split(";")
+    val grid = g.map { it.digitToInt() }.toIntArray()
+    require(grid.size == 81 && givens.indices.all { givens[it] == 0 || givens[it] == grid[it] })
+    val notes = if (n.isEmpty()) emptyMap() else n.split(",").associate { e ->
+        e.split(":").let { it[0].toInt() to it[1].map { ch -> ch.digitToInt() }.toSet() }
+    }
+    return SavedLevel(grid, notes, m.toInt(), s.toInt())
+}

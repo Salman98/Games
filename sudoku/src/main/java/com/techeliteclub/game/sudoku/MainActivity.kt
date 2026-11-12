@@ -20,6 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.GameIcons
+import com.techeliteclub.game.core.HowToIcon
+import com.techeliteclub.game.core.HowToScreen
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameActivity
 import com.techeliteclub.game.core.GameStore
@@ -31,6 +34,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Sudoku
     override val logoLines = listOf("SUDOKU")
     override val tagline = "Calm logic. Daily focus."
+    override val hasHowTo = true
     override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
@@ -61,6 +65,25 @@ class MainActivity : GameActivity() {
                 contentAlignment = Alignment.Center,
             ) { Text("7", style = displayStyle(40.sp), color = Color.White) }
         }
+    }
+
+    @Composable
+    override fun HowTo(onDone: () -> Unit) {
+        HowToScreen(
+            title = "SUDOKU",
+            rules = listOf(
+                "Fill every square with 1 to 9" to "Tap an empty square, then tap a number in the row below the board.",
+                "No repeats" to "Each number once in every row, column and 3x3 box.",
+                "Notes button: small pencil marks" to "While it is gold, a number is only written small as a reminder. Tap Notes again to fill squares normally.",
+            ),
+            pictures = listOf<@Composable () -> Unit>(
+                { HowToIcon(GameIcons.Grid) },
+                { HowToIcon(GameIcons.Close) },
+                { HowToIcon(GameIcons.Pencil) },
+            ),
+            footer = {},
+            onDone = onDone,
+        )
     }
 
     @Composable

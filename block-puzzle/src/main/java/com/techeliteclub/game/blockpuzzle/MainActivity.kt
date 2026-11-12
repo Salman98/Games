@@ -8,6 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import com.techeliteclub.game.core.GameIcons
+import com.techeliteclub.game.core.HowToIcon
+import com.techeliteclub.game.core.HowToScreen
 import com.techeliteclub.game.core.activeGems
 import com.techeliteclub.game.core.GameActivity
 import com.techeliteclub.game.core.GameStore
@@ -19,6 +24,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Block
     override val logoLines = listOf("BLOCK", "GRID")
     override val tagline = "Drag. Drop. Blast lines."
+    override val hasHowTo = true
 
     override fun homeInfo(store: GameStore) =
         HomeInfo("%,d".format(store.get("best")), pillIsTrophy = true, label = "BEST SCORE ${"%,d".format(store.get("best"))}", progress = null)
@@ -35,6 +41,25 @@ class MainActivity : GameActivity() {
                 Box(Modifier.offset(x.dp + 10.dp, y.dp + 10.dp).rotate(angle.toFloat()).size(64.dp).gem(g.first, g.second, 14.dp))
             }
         }
+    }
+
+    @Composable
+    override fun HowTo(onDone: () -> Unit) {
+        HowToScreen(
+            title = "BLOCK GRID",
+            rules = listOf(
+                "Drag a piece onto the grid" to "Drop it where it fits.",
+                "Fill a row or column to clear it" to "Clear several at once for bonus points.",
+                "No space left ends the game" to "Stuck? Undo, or swap for new pieces.",
+            ),
+            pictures = listOf<@Composable () -> Unit>(
+                { Box(Modifier.size(34.dp).gem(activeGems[1].first, activeGems[1].second, 8.dp)) },
+                { Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { repeat(4) { Box(Modifier.size(16.dp).gem(activeGems[3].first, activeGems[3].second, 4.dp)) } } },
+                { HowToIcon(GameIcons.Trophy) },
+            ),
+            footer = {},
+            onDone = onDone,
+        )
     }
 
     @Composable

@@ -23,6 +23,21 @@ class PlayMode(val daily: Boolean = false, val seed: Long = 0, val onDailyWin: (
 
 val LocalPlayMode = staticCompositionLocalOf { PlayMode() }
 
+/**
+ * The level in progress, so closing the app mid-puzzle does not lose it. One slot for the levels, one for the daily.
+ * The text is tagged with its level: a save for another level, or one [load]'s decode throws on, loads as null.
+ */
+class LevelSave(private val store: GameStore, mode: PlayMode, level: Int) {
+    private val key = if (mode.daily) "save_daily" else "save_level"
+    private val tag = "${mode.hintKey(level)}\n"
+
+    fun <T> load(decode: (String) -> T): T? =
+        store.getString(key)?.takeIf { it.startsWith(tag) }?.let { runCatching { decode(it.removePrefix(tag)) }.getOrNull() }
+
+    fun save(text: String) = store.putString(key, tag + text)
+    fun clear() = store.putString(key, "")
+}
+
 /** Best stars per level ("lvl_stars_N"); the total "stars" counts each level's best once. */
 object Progress {
     fun starsFor(store: GameStore, level: Int) = store.get("lvl_stars_$level")

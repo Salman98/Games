@@ -77,3 +77,11 @@ fun shuffle(t: Tiles, rng: Random): Tiles {
     val symbols = t.values.shuffled(rng)
     return t.keys.zip(symbols).toMap()
 }
+
+/** Saved level as text: "layer.row.column.symbol" for each tile left, split by ','. */
+fun encodeTiles(t: Tiles) = t.entries.joinToString(",") { (p, s) -> "${p.layer}.${p.r}.${p.c}.$s" }
+
+/** Throws when the text is damaged or has a tile outside the layout. */
+fun decodeTiles(text: String): Tiles =
+    text.split(",").associate { e -> e.split(".").map { it.toInt() }.let { Pos(it[0], it[1], it[2]) to it[3] } }
+        .also { t -> require(t.keys.all { it in LAYOUT } && t.values.all { it in 0 until SYMBOL_COUNT }) }

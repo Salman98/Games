@@ -38,7 +38,7 @@ Build one game's release bundle: `./gradlew :block-puzzle:bundleRelease` (swap t
 - [ ] App content → Data safety: Play Console → your app → **Policy → App content** → **Data safety** → fill with the answers below (once per app)
 - [ ] App content → Government app No, Financial features No, Health No, News No
 - [ ] App content → Advertising ID: **Yes, used for advertising** (AdMob)
-- [ ] Store listing: short description (≤80 chars), full description, icon 512×512 PNG, feature graphic 1024×500, at least 4 phone screenshots
+- [ ] Store listing: name, short and full description from `store/LISTING.md`; icon 512×512 and feature graphic 1024×500 from `store/<module>/`; 4 phone screenshots made with `store/screenshots.py`
 - [ ] Category: Puzzle (Solitaire: Card, Word Search: Word)
 - [ ] Bump `versionCode` in `<module>/build.gradle.kts` before every new upload
 - [ ] Upload first AAB to **Internal testing**, install from Play on your phone, then promote to **Production**

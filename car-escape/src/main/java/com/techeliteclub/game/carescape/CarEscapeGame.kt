@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -35,6 +36,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
@@ -89,10 +91,13 @@ fun CarEscapeGame(ads: Ads) {
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val start = remember(level) { newLevel(level, Random(mode.seedFor(level))) }
     val par = remember(start) { solve(start)?.size ?: 0 } // fewest moves possible
-    var cars by remember(level) { mutableStateOf(start) }
-    var history by remember(level) { mutableStateOf(listOf<List<Car>>()) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    val saved = remember(level) { slot.load { decodeStates(it, start) } }
+    var cars by remember(level) { mutableStateOf(saved?.last() ?: start) }
+    var history by remember(level) { mutableStateOf(saved?.dropLast(1) ?: listOf<List<Car>>()) }
     val moves = history.size
     val won = isSolved(cars)
+    LaunchedEffect(cars, history, won) { if (won) slot.clear() else slot.save(encodeStates(history + listOf(cars))) }
 
     fun play(m: Move) {
         if (m.delta == 0) return

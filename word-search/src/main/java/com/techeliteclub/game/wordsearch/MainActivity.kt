@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.GameIcons
+import com.techeliteclub.game.core.HowToIcon
+import com.techeliteclub.game.core.HowToScreen
 import com.techeliteclub.game.core.GameActivity
 import com.techeliteclub.game.core.GameStore
 import com.techeliteclub.game.core.HomeInfo
@@ -26,6 +29,7 @@ class MainActivity : GameActivity() {
     override val gameTheme = Themes.Word
     override val logoLines = listOf("WORD", "SEARCH")
     override val tagline = "Find every hidden word."
+    override val hasHowTo = true
     override val hasLevels = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
@@ -50,6 +54,25 @@ class MainActivity : GameActivity() {
                 ) { Text(ch, style = displayStyle(40.sp), color = Color(0xFF6B1F4E)) }
             }
         }
+    }
+
+    @Composable
+    override fun HowTo(onDone: () -> Unit) {
+        HowToScreen(
+            title = "WORD SEARCH",
+            rules = listOf(
+                "Swipe across a word" to "Or tap its first letter, then its last.",
+                "Words go across, down and diagonally" to "Later levels hide them backwards too.",
+                "Find every word in the list" to "Stuck? A hint shows where a word starts.",
+            ),
+            pictures = listOf<@Composable () -> Unit>(
+                { HowToIcon(GameIcons.Forward) },
+                { HowToIcon(GameIcons.Grid) },
+                { HowToIcon(GameIcons.Bulb) },
+            ),
+            footer = {},
+            onDone = onDone,
+        )
     }
 
     @Composable

@@ -29,4 +29,11 @@ class LogicTest {
         assertFalse(isFree(t, Pos(0, 0, 2))) // covered from above
         assertEquals(0, freePairs(t).size) // only one 1 is free; the 2 on top has no free twin
     }
+
+    @Test
+    fun savedTilesRoundTripAndRejectTilesOffTheLayout() {
+        val t = newLevel(4, Random(4)).tiles
+        assertEquals(t, decodeTiles(encodeTiles(t)))
+        assertTrue(runCatching { decodeTiles("9.9.9.1") }.isFailure)
+    }
 }
