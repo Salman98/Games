@@ -47,6 +47,7 @@ subprojects {
                 isMinifyEnabled = true
                 isShrinkResources = true
                 proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+                ndk { debugSymbolLevel = "SYMBOL_TABLE" } // readable native crash traces in Play Console
             }
         }
         dependencies {

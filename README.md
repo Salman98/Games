@@ -28,6 +28,7 @@ Open the folder in Android Studio, or from a terminal:
 ./gradlew :block-puzzle:bundleRelease     # Play Store bundle (.aab) for one game
 ./gradlew bundleRelease                   # Play Store bundles for all games
 ./gradlew test                            # game-logic unit tests for all games
+./gradlew assembleRelease bundleRelease   # bundle and apk both
 ```
 
 On Windows PowerShell use `.\gradlew` instead of `./gradlew`.
