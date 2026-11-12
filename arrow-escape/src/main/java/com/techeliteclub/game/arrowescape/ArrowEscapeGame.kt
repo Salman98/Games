@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
@@ -87,15 +88,19 @@ fun ArrowEscapeGame(ads: Ads) {
     val mode = LocalPlayMode.current
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val n = sizeFor(level)
-    var board by remember(level) { mutableStateOf(newLevel(level, Random(mode.seedFor(level)))) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    // shortcut: undo steps are not saved, only the board and lives; save the history too if players miss undo after a restart.
+    val saved = remember(level) { slot.load { decodeGame(it, newLevel(level, Random(mode.seedFor(level)))) } }
+    var board by remember(level) { mutableStateOf(saved?.first ?: newLevel(level, Random(mode.seedFor(level)))) }
     var history by remember(level) { mutableStateOf(listOf<List<Dir?>>()) }
-    var lives by remember(level) { mutableIntStateOf(LIVES) }
+    var lives by remember(level) { mutableIntStateOf(saved?.second ?: LIVES) }
     var hinted by remember(level) { mutableStateOf<Int?>(null) }
     var blocked by remember(level) { mutableStateOf<Int?>(null) }
     var blockedTick by remember(level) { mutableIntStateOf(0) }
     var leaving by remember(level) { mutableStateOf(mapOf<Int, Dir>()) }
     val shake = remember { Animatable(0f) }
     val won = board.all { it == null } && leaving.isEmpty()
+    LaunchedEffect(board, lives, won) { if (won) slot.clear() else slot.save(encodeGame(board, lives)) }
 
     LaunchedEffect(blockedTick) {
         if (blockedTick > 0) for (x in listOf(10f, -10f, 7f, -7f, 0f)) shake.animateTo(x, tween(45))
@@ -127,10 +132,11 @@ fun ArrowEscapeGame(ads: Ads) {
         ads, "ARROW ESCAPE",
         pills = listOf(Pill(mode.label(level)), Pill("$lives / $LIVES", GameIcons.Heart, gold = true)),
         tools = listOf(
-            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { board = history.last(); history = history.dropLast(1); blocked = null },
+            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { board = history.last(); history = history.dropLast(1); blocked = null; hinted = null },
             Tool("Restart", GameIcons.Restart, onClick = ::restart),
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level)) { hinted = board.indices.firstOrNull { canExit(board, n, it) } },
+        // Off while a hint is still showing: another one would point at the same thing and waste the player's ad.
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), enabled = hinted == null) { hinted = board.indices.firstOrNull { canExit(board, n, it) } },
     ) {
         Bezel(Modifier.fillMaxWidth().aspectRatio(1f), padding = 10.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {

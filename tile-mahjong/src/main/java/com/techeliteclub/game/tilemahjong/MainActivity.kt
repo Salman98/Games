@@ -8,6 +8,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import com.techeliteclub.game.core.HowToScreen
 import com.techeliteclub.game.core.GameActivity
 import com.techeliteclub.game.core.GameStore
 import com.techeliteclub.game.core.HomeInfo
@@ -19,6 +22,7 @@ class MainActivity : GameActivity() {
     override val logoLines = listOf("TILE", "MAHJONG")
     override val tagline = "Match the free tiles. Clear the table."
     override val hasLevels = true
+    override val hasHowTo = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)
@@ -37,6 +41,25 @@ class MainActivity : GameActivity() {
                 )
             }
         }
+    }
+
+    @Composable
+    override fun HowTo(onDone: () -> Unit) {
+        HowToScreen(
+            title = "TILE MAHJONG",
+            rules = listOf(
+                "Match two tiles with the same picture" to "Tap one, then its twin.",
+                "Only free tiles can be picked" to "Free: nothing on top, and the left or right side open.",
+                "Dim tiles are blocked" to "Clear the table to win. Stuck? Shuffle.",
+            ),
+            pictures = listOf<@Composable () -> Unit>(
+                { Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { MahjongTile(0, 34.dp, 44.dp, glow = true); MahjongTile(0, 34.dp, 44.dp, glow = true) } },
+                { MahjongTile(3, 34.dp, 44.dp) },
+                { MahjongTile(5, 34.dp, 44.dp, dim = true) },
+            ),
+            footer = {},
+            onDone = onDone,
+        )
     }
 
     @Composable

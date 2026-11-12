@@ -111,11 +111,12 @@ fun SolitaireGame(ads: Ads) {
         ads, "SOLITAIRE",
         pills = listOf(Pill("MOVES ${history.size}"), Pill("%d:%02d".format(seconds / 60, seconds % 60), GameIcons.Clock)),
         tools = listOf(
-            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { board = history.last(); history = history.dropLast(1) },
+            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { board = history.last(); history = history.dropLast(1); hinted = null },
             Tool("New deal", GameIcons.Restart, onClick = ::newDeal),
             Tool("Auto", GameIcons.Wand, enabled = canAutoFinish(board)) { commit(autoFinish(board)) },
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = dealNo) { hinted = hint(board) },
+        // Off while a hint is still showing: another one would point at the same thing and waste the player's ad.
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = dealNo, enabled = hinted == null) { hinted = hint(board) },
     ) {
         BoxWithConstraints(Modifier.fillMaxWidth().weight(1f)) {
             val w = maxWidth / 7

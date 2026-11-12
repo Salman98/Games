@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,6 +33,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
@@ -71,12 +73,16 @@ fun TileMahjongGame(ads: Ads) {
     val mode = LocalPlayMode.current
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val start = remember(level) { newLevel(level, Random(mode.seedFor(level))).tiles }
-    var tiles by remember(level) { mutableStateOf(start) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    // shortcut: undo steps are not saved, only the tiles left; save the history too if players miss undo after a restart.
+    val saved = remember(level) { slot.load(::decodeTiles) }
+    var tiles by remember(level) { mutableStateOf(saved ?: start) }
     var history by remember(level) { mutableStateOf(listOf<Tiles>()) }
     var selected by remember(level) { mutableStateOf<Pos?>(null) }
     var hint by remember(level) { mutableStateOf<Pair<Pos, Pos>?>(null) }
     val available = freePairs(tiles).size
     val stuck = tiles.isNotEmpty() && available == 0
+    LaunchedEffect(tiles) { if (tiles.isEmpty()) slot.clear() else slot.save(encodeTiles(tiles)) }
 
     fun restart() { tiles = start; history = emptyList(); selected = null; hint = null }
 
@@ -97,10 +103,11 @@ fun TileMahjongGame(ads: Ads) {
         ads, "TILE MAHJONG",
         pills = listOf(Pill(mode.label(level)), Pill("${tiles.size} TILES · $available MATCHES")),
         tools = listOf(
-            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { tiles = history.last(); history = history.dropLast(1); selected = null },
+            Tool("Undo", GameIcons.Undo, enabled = history.isNotEmpty()) { tiles = history.last(); history = history.dropLast(1); selected = null; hint = null },
             Tool("Shuffle", GameIcons.Shuffle, enabled = tiles.isNotEmpty()) { tiles = shuffle(tiles, rng); selected = null; hint = null },
         ),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level)) { hint = freePairs(tiles).firstOrNull() },
+        // Off while a hint is still showing: another one would point at the same thing and waste the player's ad.
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), enabled = hint == null) { hint = freePairs(tiles).firstOrNull() },
     ) {
         Bezel(Modifier.fillMaxWidth().height(400.dp), padding = 10.dp) {
             BoxWithConstraints(Modifier.fillMaxSize()) {

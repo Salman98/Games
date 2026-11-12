@@ -80,3 +80,15 @@ fun newLevel(level: Int, rng: Random): List<Car> {
     }
     return best ?: listOf(Car(EXIT_ROW, 0, 2, true))
 }
+
+/** Saved level as text: every state from the first move to now, one digit per car (its column if sideways, else its row). */
+fun encodeStates(states: List<List<Car>>) = states.joinToString(";") { s -> s.joinToString("") { "${if (it.horizontal) it.c else it.r}" } }
+
+/** Throws when the text is damaged or does not fit [start] (the level as dealt): cars off the board or overlapping. */
+fun decodeStates(text: String, start: List<Car>): List<List<Car>> = text.split(";").map { s ->
+    require(s.length == start.size)
+    start.mapIndexed { i, car -> s[i].digitToInt().let { if (car.horizontal) car.copy(c = it) else car.copy(r = it) } }.also { cars ->
+        val cells = cars.flatMap { it.cells() }
+        require(cars.all { (if (it.horizontal) it.c else it.r) + it.len <= N } && cells.size == cells.toSet().size)
+    }
+}

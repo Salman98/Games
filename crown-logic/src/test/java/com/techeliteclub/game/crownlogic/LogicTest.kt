@@ -28,4 +28,13 @@ class LogicTest {
         assertTrue(conflicts(p, listOf(0, p.n + 1)).isNotEmpty()) // touching diagonally
         assertFalse(isSolved(p, listOf(0)))
     }
+
+    @Test
+    fun savedGameRoundTripsAndRejectsOtherSizes() {
+        val cells = IntArray(25) { it % 3 }
+        val (back, seconds) = decodeGame(encodeGame(cells, 75), 5)
+        assertTrue(back.contentEquals(cells))
+        assertEquals(75, seconds)
+        assertTrue(runCatching { decodeGame(encodeGame(cells, 75), 6) }.isFailure)
+    }
 }

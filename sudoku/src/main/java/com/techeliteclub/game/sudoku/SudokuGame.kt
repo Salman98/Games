@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
@@ -66,15 +67,19 @@ fun SudokuGame(ads: Ads) {
     val mode = LocalPlayMode.current
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val puzzle = remember(level) { newPuzzle(level, Random(mode.seedFor(level))) }
-    var grid by remember(level) { mutableStateOf(puzzle.givens.copyOf()) }
-    var notes by remember(level) { mutableStateOf(mapOf<Int, Set<Int>>()) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    val saved = remember(level) { slot.load { decodeGame(it, puzzle.givens) } }
+    var grid by remember(level) { mutableStateOf(saved?.grid ?: puzzle.givens.copyOf()) }
+    var notes by remember(level) { mutableStateOf(saved?.notes ?: mapOf<Int, Set<Int>>()) }
     var history by remember(level) { mutableStateOf(listOf<Step>()) }
     var noteMode by remember(level) { mutableStateOf(false) }
     var selected by remember(level) { mutableStateOf<Int?>(null) }
-    var mistakes by remember(level) { mutableIntStateOf(0) }
-    var seconds by remember(level) { mutableIntStateOf(0) }
+    var mistakes by remember(level) { mutableIntStateOf(saved?.mistakes ?: 0) }
+    var seconds by remember(level) { mutableIntStateOf(saved?.seconds ?: 0) }
     val won = isSolved(grid, puzzle.solution)
     LaunchedEffect(level, won) { while (!won) { delay(1000); seconds++ } }
+    // shortcut: the clock is saved with each move, not each second; save on pause if players notice lost time.
+    LaunchedEffect(grid, notes, mistakes, won) { if (won) slot.clear() else slot.save(encodeGame(grid, notes, mistakes, seconds)) }
 
     // How many of each digit are correctly placed (to fade finished digits).
     val placed = IntArray(10).also { counts -> for (i in 0 until 81) if (grid[i] != 0 && grid[i] == puzzle.solution[i]) counts[grid[i]]++ }
@@ -117,7 +122,7 @@ fun SudokuGame(ads: Ads) {
                 val last = history.last(); grid = last.grid; notes = last.notes; history = history.dropLast(1)
             },
             Tool("Erase", GameIcons.Erase) { selected?.let { put(it, 0) } },
-            Tool(if (noteMode) "Notes ON" else "Notes", GameIcons.Pencil) { noteMode = !noteMode },
+            Tool(if (noteMode) "Notes ON" else "Notes", GameIcons.Pencil, gold = noteMode) { noteMode = !noteMode },
         ),
         hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), onHint = ::hint),
     ) {

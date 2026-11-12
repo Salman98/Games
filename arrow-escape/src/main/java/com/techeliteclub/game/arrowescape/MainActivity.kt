@@ -12,6 +12,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import com.techeliteclub.game.core.GameIcons
+import com.techeliteclub.game.core.GoldIcon
+import com.techeliteclub.game.core.HowToScreen
 import com.techeliteclub.game.core.GameActivity
 import com.techeliteclub.game.core.GameStore
 import com.techeliteclub.game.core.HomeInfo
@@ -22,6 +27,7 @@ class MainActivity : GameActivity() {
     override val logoLines = listOf("ARROW", "ESCAPE")
     override val tagline = "Clear the board, one arrow at a time."
     override val hasLevels = true
+    override val hasHowTo = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)
@@ -40,6 +46,25 @@ class MainActivity : GameActivity() {
             ArrowTile(Dir.RIGHT, 90.dp, Modifier.offset(115.dp, 95.dp))
             ArrowTile(Dir.DOWN, 70.dp, Modifier.offset(225.dp, 40.dp).rotate(12f))
         }
+    }
+
+    @Composable
+    override fun HowTo(onDone: () -> Unit) {
+        HowToScreen(
+            title = "ARROW ESCAPE",
+            rules = listOf(
+                "Tap an arrow to send it off" to "It flies the way it points.",
+                "The path must be clear" to "An arrow cannot pass through another arrow.",
+                "3 lives per level" to "A blocked tap costs one. Clear every arrow to win.",
+            ),
+            pictures = listOf<@Composable () -> Unit>(
+                { ArrowTile(Dir.RIGHT, 44.dp) },
+                { Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) { ArrowTile(Dir.RIGHT, 36.dp, alarm = true); ArrowTile(Dir.UP, 36.dp) } },
+                { GoldIcon(GameIcons.Heart, 40.dp) },
+            ),
+            footer = {},
+            onDone = onDone,
+        )
     }
 
     @Composable

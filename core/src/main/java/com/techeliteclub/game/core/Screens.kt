@@ -455,6 +455,10 @@ private fun SettingRow(icon: androidx.compose.ui.graphics.vector.ImageVector, la
     }
 }
 
+/** A gold line icon as a how-to rule's picture, for rules with no game piece to show. */
+@Composable
+fun HowToIcon(icon: androidx.compose.ui.graphics.vector.ImageVector) = Icon(icon, null, tint = Color(0xFFFFD34D), modifier = Modifier.size(38.dp))
+
 /** How-to-play layout: logo, numbered rule cards (each with its own picture), and a big button. */
 @Composable
 fun HowToScreen(title: String, rules: List<Pair<String, String>>, pictures: List<@Composable () -> Unit>, footer: @Composable () -> Unit, onDone: () -> Unit) {

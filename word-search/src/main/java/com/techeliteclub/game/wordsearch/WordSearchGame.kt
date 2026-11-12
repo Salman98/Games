@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.LevelSave
 import com.techeliteclub.game.core.Bezel
 import com.techeliteclub.game.core.GameIcons
 import com.techeliteclub.game.core.GameScaffold
@@ -68,12 +70,16 @@ fun WordSearchGame(ads: Ads) {
     val mode = LocalPlayMode.current
     var level by remember { mutableIntStateOf(mode.startLevel(store)) }
     val puzzle = remember(level) { newPuzzle(level, Random(mode.seedFor(level))) }
-    var found by remember(level) { mutableStateOf(listOf<String>()) }
+    val slot = remember(level) { LevelSave(store, mode, level) }
+    // Saved level: the found words, split by ','; a word that is not in this puzzle rejects the save.
+    val saved = remember(level) { slot.load { t -> t.split(",").filter { it.isNotEmpty() }.distinct().also { require(puzzle.placed.keys.containsAll(it)) } } }
+    var found by remember(level) { mutableStateOf(saved ?: listOf<String>()) }
     var start by remember(level) { mutableStateOf<Int?>(null) }
     var current by remember(level) { mutableStateOf<Int?>(null) }
     var hinted by remember(level) { mutableStateOf<Int?>(null) }
     val n = puzzle.n
     val words = puzzle.placed.keys.toList()
+    LaunchedEffect(found) { if (found.size == words.size) slot.clear() else slot.save(found.joinToString(",")) }
 
     fun finish(a: Int, b: Int) {
         val w = wordAt(puzzle, a, b, found.toSet())
@@ -87,7 +93,8 @@ fun WordSearchGame(ads: Ads) {
         ads, "WORD SEARCH",
         pills = listOf(Pill(mode.label(level)), Pill("${found.size} / ${words.size} WORDS")),
         tools = listOf(Tool("Restart", GameIcons.Restart) { found = emptyList(); start = null; current = null; hinted = null }),
-        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level)) {
+        // Off while a hint is still showing: another one would point at the same thing and waste the player's ad.
+        hint = Hint("Hint", GameIcons.Bulb, levelKey = mode.hintKey(level), enabled = hinted == null) {
             hinted = words.firstOrNull { it !in found }?.let { puzzle.placed.getValue(it).first() }
         },
     ) {

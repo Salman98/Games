@@ -200,7 +200,8 @@ abstract class GameActivity : ComponentActivity() {
     }
 }
 
-data class Tool(val label: String, val icon: ImageVector, val enabled: Boolean = true, val onClick: () -> Unit)
+/** [gold] highlights a tool that is switched on (Sudoku's notes mode). */
+data class Tool(val label: String, val icon: ImageVector, val enabled: Boolean = true, val gold: Boolean = false, val onClick: () -> Unit)
 
 /**
  * The rewarded hint button. The first use per [levelKey] is free; after that it plays a rewarded ad.
@@ -252,7 +253,7 @@ fun GameScaffold(
             )
             Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 for (tool in tools) {
-                    ToolButton(tool.label, tool.icon, Modifier.weight(1f), tool.enabled) { feedback.tap(); tool.onClick() }
+                    ToolButton(tool.label, tool.icon, Modifier.weight(1f), tool.enabled, gold = tool.gold) { feedback.tap(); tool.onClick() }
                 }
                 if (hint != null) {
                     // Saved, so leaving and re-entering the level does not give another free hint.

@@ -12,6 +12,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.techeliteclub.game.core.Ads
+import com.techeliteclub.game.core.GameIcons
+import com.techeliteclub.game.core.GoldIcon
+import com.techeliteclub.game.core.HowToScreen
 import com.techeliteclub.game.core.GameActivity
 import com.techeliteclub.game.core.GameStore
 import com.techeliteclub.game.core.HomeInfo
@@ -22,6 +25,7 @@ class MainActivity : GameActivity() {
     override val logoLines = listOf("CAR", "ESCAPE")
     override val tagline = "Slide the cars. Free the red one."
     override val hasLevels = true
+    override val hasHowTo = true
 
     override fun homeInfo(store: GameStore): HomeInfo {
         val level = store.get("level", 1)
@@ -38,6 +42,25 @@ class MainActivity : GameActivity() {
             HeroCar(true, 170.dp, 76.dp, hero = true, modifier = Modifier.offset(110.dp, 66.dp).rotate(-4f))
             HeroCar(false, 60.dp, 120.dp, hero = false, modifier = Modifier.offset(270.dp, 10.dp).rotate(6f))
         }
+    }
+
+    @Composable
+    override fun HowTo(onDone: () -> Unit) {
+        HowToScreen(
+            title = "CAR ESCAPE",
+            rules = listOf(
+                "Get the red car to the exit" to "The green gate on the right edge.",
+                "Drag a car to slide it" to "Cars only move along their length.",
+                "Fewer moves, more stars" to "Match the PAR for 3 stars.",
+            ),
+            pictures = listOf<@Composable () -> Unit>(
+                { HeroCar(true, 70.dp, 34.dp, hero = true) },
+                { HeroCar(false, 30.dp, 62.dp, hero = false) },
+                { GoldIcon(GameIcons.StarGold, 40.dp) },
+            ),
+            footer = {},
+            onDone = onDone,
+        )
     }
 
     @Composable

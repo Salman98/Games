@@ -29,4 +29,12 @@ class LogicTest {
         assertEquals(-1..3, slideRange(cars, 1))
         assertEquals(2, solve(cars)!!.size) // move blocker away, then drive out
     }
+
+    @Test
+    fun savedStatesRoundTripAndRejectCarsOffTheBoard() {
+        val start = newLevel(3, Random(3))
+        val states = listOf(start, move(start, solve(start)!!.first()))
+        assertEquals(states, decodeStates(encodeStates(states), start))
+        assertTrue(runCatching { decodeStates("9".repeat(start.size), start) }.isFailure)
+    }
 }
