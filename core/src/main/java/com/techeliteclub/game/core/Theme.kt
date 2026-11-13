@@ -97,6 +97,24 @@ object Themes {
         logo1 = listOf(c(0xFFFFF3C4), c(0xFFFFC65A), c(0xFFFF7A1A)), logo2 = listOf(Color.White, c(0xFFFFE1C2)),
         rim = listOf(c(0xFFFFD9A8), c(0xFFC27A3A), c(0xFF6B3A12)), tray = listOf(c(0xFF5A3520), c(0xFF40240F)),
     )
+    val MiniSudoku = GameTheme(
+        bg = listOf(c(0xFFEFFBF6), c(0xFFE2F6EE), c(0xFFD3EFE3)), bloom = c(0xE6FFFFFF), ink = c(0xFF2F5A55), stroke = c(0xFF0F3B3A),
+        primary = listOf(c(0xFF4FD8C2), c(0xFF0FA58F), c(0xFF0B7D6C)), primaryInk = Color.White, glow = c(0x590FA58F),
+        logo1 = listOf(c(0xFF2CC4AD), c(0xFF0B7D6C)), logo2 = listOf(c(0xFFFFB86B), c(0xFFF2761B)),
+        rim = listOf(Color.White, c(0xFFBFE6DA), c(0xFF7DBFAE)), tray = listOf(Color.White, Color.White), light = true,
+    )
+    val SunMoon = GameTheme(
+        bg = listOf(c(0xFF3A2A8C), c(0xFF241A5E), c(0xFF100B33)), bloom = c(0x73FFC46B), ink = c(0xFFE9E2FF), stroke = c(0xFF1A0F45),
+        primary = GOLD, primaryInk = c(0xFF3A2200), glow = c(0x73FFBE28),
+        logo1 = GOLD_LOGO, logo2 = listOf(Color.White, c(0xFFCFD8FF)),
+        rim = listOf(c(0xFFCFC2FF), c(0xFF6A55D0), c(0xFF2C1F7A)), tray = listOf(c(0xFF1C1450), c(0xFF140E3C)),
+    )
+    val Path = GameTheme(
+        bg = listOf(c(0xFF8E2463), c(0xFF5C1447), c(0xFF2A0822)), bloom = c(0x73FF9AD0), ink = c(0xFFFFE3F1), stroke = c(0xFF3A0A28),
+        primary = GOLD, primaryInk = c(0xFF3A2200), glow = c(0x73FFBE28),
+        logo1 = listOf(Color.White, c(0xFFFFD3EA)), logo2 = GOLD_LOGO,
+        rim = listOf(c(0xFFFFD0E8), c(0xFFC2478A), c(0xFF6A1646)), tray = listOf(c(0xFF3A0F2C), c(0xFF2A0920)),
+    )
 }
 
 val LocalGameTheme = staticCompositionLocalOf { Themes.Block }

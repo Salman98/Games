@@ -1,6 +1,6 @@
 # Games
 
-10 Android puzzle games in one repo, sharing **one `gradlew`** and one `core` module.
+13 Android puzzle games in one repo, sharing **one `gradlew`** and one `core` module.
 Kotlin + Jetpack Compose, AdMob ads (banner, rewarded, interstitial).
 
 | Module | Game | Rewarded ad gives |
@@ -15,6 +15,9 @@ Kotlin + Jetpack Compose, AdMob ads (banner, rewarded, interstitial).
 | `solitaire` | Solitaire Klondike (draw 1) | Shows a move |
 | `car-escape` | Car Escape (slide cars, free the red car) | Plays the next best move |
 | `merge-2048` | 2048 Merge | Undo |
+| `mini-sudoku` | Mini Sudoku 6×6 (boxes of 2×3) | Fills a cell |
+| `sun-moon` | Sun & Moon (equal suns and moons per line, never three in a row) | Fills a cell |
+| `number-path` | Number Path (one line through every square, numbers in order) | Draws the next 3 squares |
 
 ## Build
 
@@ -22,7 +25,7 @@ Open the folder in Android Studio, or from a terminal:
 
 ```bash
 ./gradlew :block-puzzle:installDebug      # install one game on a phone/emulator
-./gradlew installDebug                    # install all 10 games
+./gradlew installDebug                    # install all games
 ./gradlew installDebug --continue         # all games; keep going if one fails, list failures at the end
 ./gradlew :sudoku:installDebug :solitaire:installDebug   # only the games you name
 ./gradlew :block-puzzle:bundleRelease     # Play Store bundle (.aab) for one game
@@ -53,6 +56,9 @@ Uninstall: `adb uninstall com.techeliteclub.game.blockpuzzle`. Module names and 
 | `solitaire` | `com.techeliteclub.game.solitaire` |
 | `car-escape` | `com.techeliteclub.game.carescape` |
 | `merge-2048` | `com.techeliteclub.game.merge2048` |
+| `mini-sudoku` | `com.techeliteclub.game.minisudoku` |
+| `sun-moon` | `com.techeliteclub.game.sunmoon` |
+| `number-path` | `com.techeliteclub.game.numberpath` |
 
 ## Layout
 

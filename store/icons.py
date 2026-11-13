@@ -28,6 +28,9 @@ GAMES = {
     "solitaire": dict(name="SOLITAIRE", tag="The classic, beautifully dealt.", bg=["1F8A52", "0F5A35", "062D1A"], bloom="AAFFC8", logo=["FFF7CF", "FFD34D"]),
     "car-escape": dict(name="CAR ESCAPE", tag="Slide the cars. Free the red one.", bg=["1B1F3A", "11132A", "07081A"], bloom="FF4678", logo=["FFFFFF", "FFC2CF"]),
     "merge-2048": dict(name="2048", tag="Swipe. Merge. Go higher.", bg=["4A2A1A", "2E170C", "170A04"], bloom="FFAA50", logo=["FFF3C4", "FFC65A"]),
+    "mini-sudoku": dict(name="MINI SUDOKU", tag="Six by six. Solved in minutes.", bg=["4FD8C2", "0FA58F", "0B7D6C"], bloom="FFFFFF", logo=["FFFFFF", "D9FFF6"]),
+    "sun-moon": dict(name="SUN & MOON", tag="Balance every row and column.", bg=["3A2A8C", "241A5E", "100B33"], bloom="FFC46B", logo=["FFF7CF", "FFD34D"]),
+    "number-path": dict(name="NUMBER PATH", tag="One line. Every square.", bg=["8E2463", "5C1447", "2A0822"], bloom="FF9AD0", logo=["FFFFFF", "FFD3EA"]),
 }
 
 
@@ -293,7 +296,67 @@ def art_2048(img):
     return img
 
 
-ART = {"block-puzzle": art_block, "color-sort": art_sort, "crown-logic": art_crown, "arrow-escape": art_arrow,
+def art_minisudoku(img):
+    box = [300, 420, 1748, 1628]  # 3 columns by 2 rows, like one box of the puzzle
+    img = shadow(img, box, 140)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 140, fill=hx("FFFFFF"))
+    cw, ch = (box[2] - box[0] - 120) / 3, (box[3] - box[1] - 120) / 2
+    x0, y0 = box[0] + 60, box[1] + 60
+    d.rounded_rectangle([x0 + cw, y0, x0 + 2 * cw, y0 + ch], 40, fill=hx("FFE0BF"))
+    for i in (1, 2):
+        d.line([x0 + i * cw, y0, x0 + i * cw, y0 + 2 * ch], fill=hx("BFE6DA"), width=18)
+    d.line([x0, y0 + ch, x0 + 3 * cw, y0 + ch], fill=hx("BFE6DA"), width=18)
+    f = ImageFont.truetype(LILITA, 380)
+    nums = [["1", "6", ""], ["", "4", "2"]]
+    for r in range(2):
+        for c in range(3):
+            if nums[r][c]:
+                text_c(d, (x0 + c * cw + cw / 2, y0 + r * ch + ch / 2 + 10), nums[r][c], f, hx("F2761B") if (r, c) == (0, 1) else hx("0B7D6C"))
+    return img
+
+
+def art_sunmoon(img):
+    box = [300, 300, 1748, 1748]
+    img = shadow(img, box, 140)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 140, fill=hx("2A2170"))
+    half = (box[2] - box[0]) / 2
+    d.line([box[0] + half, box[1] + 40, box[0] + half, box[3] - 40], fill=hx("5A4FC0"), width=14)
+    d.line([box[0] + 40, box[1] + half, box[2] - 40, box[1] + half], fill=hx("5A4FC0"), width=14)
+    for k, sun in enumerate([True, False, False, True]):
+        cx, cy = box[0] + half * (k % 2 + 0.5), box[1] + half * (k // 2 + 0.5)
+        if sun:
+            d.ellipse([cx - 250, cy - 250, cx + 250, cy + 250], fill=hx("FFC533"))
+            d.ellipse([cx - 190, cy - 190, cx + 190, cy + 190], fill=hx("FFF1A8"))
+            d.ellipse([cx - 150, cy - 130, cx + 150, cy + 170], fill=hx("FFB81E"))
+        else:
+            d.ellipse([cx - 230, cy - 230, cx + 230, cy + 230], fill=hx("C9D8FF"))
+            d.ellipse([cx - 100, cy - 270, cx + 290, cy + 120], fill=hx("2A2170"))
+    return img
+
+
+def art_path(img):
+    box = [300, 300, 1748, 1748]
+    img = shadow(img, box, 140)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 140, fill=hx("4A1638"))
+    cell = (box[2] - box[0] - 160) / 3
+    pt = lambda i: (box[0] + 80 + (i % 3 + 0.5) * cell, box[1] + 80 + (i // 3 + 0.5) * cell)
+    route = [0, 1, 2, 5, 4, 3, 6, 7, 8]
+    d.line([pt(i) for i in route], fill=hx("FFC233"), width=150, joint="curve")
+    for i in (route[0], route[-1]):
+        x, y = pt(i)
+        d.ellipse([x - 75, y - 75, x + 75, y + 75], fill=hx("FFC233"))
+    f = ImageFont.truetype(LILITA, 200)
+    for i, txt in ((0, "1"), (4, "2"), (8, "3")):
+        x, y = pt(i)
+        d.ellipse([x - 150, y - 150, x + 150, y + 150], fill=hx("FFFFFF"))
+        text_c(d, (x, y + 8), txt, f, hx("1C0714"))
+    return img
+
+
+ART = {"mini-sudoku": art_minisudoku, "sun-moon": art_sunmoon, "number-path": art_path, "block-puzzle": art_block, "color-sort": art_sort, "crown-logic": art_crown, "arrow-escape": art_arrow,
        "tile-mahjong": art_mahjong, "sudoku": art_sudoku, "word-search": art_word, "solitaire": art_solitaire,
        "car-escape": art_car, "merge-2048": art_2048}
 

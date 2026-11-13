@@ -16,6 +16,9 @@ Tick boxes as you go (GitHub shows them as checkboxes). Do the sections in order
 | 8 | Solitaire Klondike | `solitaire` | `com.techeliteclub.game.solitaire` |
 | 9 | Car Escape | `car-escape` | `com.techeliteclub.game.carescape` |
 | 10 | 2048 Merge | `merge-2048` | `com.techeliteclub.game.merge2048` |
+| 11 | Mini Sudoku 6x6 | `mini-sudoku` | `com.techeliteclub.game.minisudoku` |
+| 12 | Sun & Moon Logic | `sun-moon` | `com.techeliteclub.game.sunmoon` |
+| 13 | Number Path | `number-path` | `com.techeliteclub.game.numberpath` |
 
 Package names can never change after the first upload.
 

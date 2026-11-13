@@ -179,6 +179,9 @@ val ALL_GAMES = listOf(
     GameInfo("Solitaire", "com.techeliteclub.game.solitaire", "The classic card game", Themes.Solitaire),
     GameInfo("Car Escape", "com.techeliteclub.game.carescape", "Free the red car", Themes.Car),
     GameInfo("2048", "com.techeliteclub.game.merge2048", "Swipe and merge", Themes.M2048),
+    GameInfo("Mini Sudoku", "com.techeliteclub.game.minisudoku", "Six by six, in minutes", Themes.MiniSudoku),
+    GameInfo("Sun & Moon", "com.techeliteclub.game.sunmoon", "Balance suns and moons", Themes.SunMoon),
+    GameInfo("Number Path", "com.techeliteclub.game.numberpath", "One line, every square", Themes.Path),
 )
 
 fun isInstalled(context: Context, pkg: String) = context.packageManager.getLaunchIntentForPackage(pkg) != null
