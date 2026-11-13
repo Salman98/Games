@@ -28,7 +28,6 @@ GAMES = {
     "solitaire": dict(name="SOLITAIRE", tag="The classic, beautifully dealt.", bg=["1F8A52", "0F5A35", "062D1A"], bloom="AAFFC8", logo=["FFF7CF", "FFD34D"]),
     "car-escape": dict(name="CAR ESCAPE", tag="Slide the cars. Free the red one.", bg=["1B1F3A", "11132A", "07081A"], bloom="FF4678", logo=["FFFFFF", "FFC2CF"]),
     "merge-2048": dict(name="2048", tag="Swipe. Merge. Go higher.", bg=["4A2A1A", "2E170C", "170A04"], bloom="FFAA50", logo=["FFF3C4", "FFC65A"]),
-    "mini-sudoku": dict(name="MINI SUDOKU", tag="Six by six. Solved in minutes.", bg=["4FD8C2", "0FA58F", "0B7D6C"], bloom="FFFFFF", logo=["FFFFFF", "D9FFF6"]),
     "sun-moon": dict(name="SUN & MOON", tag="Balance every row and column.", bg=["3A2A8C", "241A5E", "100B33"], bloom="FFC46B", logo=["FFF7CF", "FFD34D"]),
     "number-path": dict(name="NUMBER PATH", tag="One line. Every square.", bg=["8E2463", "5C1447", "2A0822"], bloom="FF9AD0", logo=["FFFFFF", "FFD3EA"]),
 }
@@ -296,26 +295,6 @@ def art_2048(img):
     return img
 
 
-def art_minisudoku(img):
-    box = [300, 420, 1748, 1628]  # 3 columns by 2 rows, like one box of the puzzle
-    img = shadow(img, box, 140)
-    d = ImageDraw.Draw(img)
-    d.rounded_rectangle(box, 140, fill=hx("FFFFFF"))
-    cw, ch = (box[2] - box[0] - 120) / 3, (box[3] - box[1] - 120) / 2
-    x0, y0 = box[0] + 60, box[1] + 60
-    d.rounded_rectangle([x0 + cw, y0, x0 + 2 * cw, y0 + ch], 40, fill=hx("FFE0BF"))
-    for i in (1, 2):
-        d.line([x0 + i * cw, y0, x0 + i * cw, y0 + 2 * ch], fill=hx("BFE6DA"), width=18)
-    d.line([x0, y0 + ch, x0 + 3 * cw, y0 + ch], fill=hx("BFE6DA"), width=18)
-    f = ImageFont.truetype(LILITA, 380)
-    nums = [["1", "6", ""], ["", "4", "2"]]
-    for r in range(2):
-        for c in range(3):
-            if nums[r][c]:
-                text_c(d, (x0 + c * cw + cw / 2, y0 + r * ch + ch / 2 + 10), nums[r][c], f, hx("F2761B") if (r, c) == (0, 1) else hx("0B7D6C"))
-    return img
-
-
 def art_sunmoon(img):
     box = [300, 300, 1748, 1748]
     img = shadow(img, box, 140)
@@ -356,7 +335,7 @@ def art_path(img):
     return img
 
 
-ART = {"mini-sudoku": art_minisudoku, "sun-moon": art_sunmoon, "number-path": art_path, "block-puzzle": art_block, "color-sort": art_sort, "crown-logic": art_crown, "arrow-escape": art_arrow,
+ART = {"sun-moon": art_sunmoon, "number-path": art_path, "block-puzzle": art_block, "color-sort": art_sort, "crown-logic": art_crown, "arrow-escape": art_arrow,
        "tile-mahjong": art_mahjong, "sudoku": art_sudoku, "word-search": art_word, "solitaire": art_solitaire,
        "car-escape": art_car, "merge-2048": art_2048}
 

@@ -30,7 +30,6 @@ include(
     ":solitaire",
     ":car-escape",
     ":merge-2048",
-    ":mini-sudoku",
     ":sun-moon",
     ":number-path",
 )
