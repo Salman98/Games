@@ -28,6 +28,16 @@ GAMES = {
     "solitaire": dict(name="SOLITAIRE", tag="The classic, beautifully dealt.", bg=["1F8A52", "0F5A35", "062D1A"], bloom="AAFFC8", logo=["FFF7CF", "FFD34D"]),
     "car-escape": dict(name="CAR ESCAPE", tag="Slide the cars. Free the red one.", bg=["1B1F3A", "11132A", "07081A"], bloom="FF4678", logo=["FFFFFF", "FFC2CF"]),
     "merge-2048": dict(name="2048", tag="Swipe. Merge. Go higher.", bg=["4A2A1A", "2E170C", "170A04"], bloom="FFAA50", logo=["FFF3C4", "FFC65A"]),
+    "sun-moon": dict(name="SUN & MOON", tag="Balance every row and column.", bg=["3A2A8C", "241A5E", "100B33"], bloom="FFC46B", logo=["FFF7CF", "FFD34D"]),
+    "nonogram": dict(name="NONOGRAM", tag="Follow the numbers. Reveal the picture.", bg=["0F7A80", "08484F", "03232A"], bloom="78FFE6", logo=["FFFFFF", "A8FFF0"]),
+    "rectangles": dict(name="RECTANGLES", tag="Cut the grid. Match every number.", bg=["FFB35C", "F2801C", "D65F00"], bloom="FFFFFF", logo=["FFFFFF", "FFF1DC"]),
+    "number-match": dict(name="NUMBER MATCH", tag="Pair equal numbers or tens.", bg=["6F9BFF", "3A62EA", "2547C9"], bloom="FFFFFF", logo=["FFFFFF", "DDE4FF"]),
+    "cryptogram": dict(name="CRYPTOGRAM", tag="Crack the code. Read the quote.", bg=["22634A", "133D2C", "061D13"], bloom="FFE296", logo=["FFF6DB", "E7C98A"]),
+    "five-letters": dict(name="FIVE LETTERS", tag="Six tries. One word.", bg=["2C3548", "1A2031", "0B0E17"], bloom="4FE0C0", logo=["FFFFFF", "8FF5DC"]),
+    "word-groups": dict(name="WORD GROUPS", tag="Sixteen words. Four secret groups.", bg=["B18AFF", "7A45EA", "5A28C8"], bloom="FFFFFF", logo=["FFFFFF", "FFE2A8"]),
+    "domino-logic": dict(name="DOMINO LOGIC", tag="Every region has a rule.", bg=["9A4A22", "622B12", "2C1206"], bloom="FFC88C", logo=["FFFFFF", "FFD34D"]),
+    "bridges": dict(name="BRIDGES", tag="Link every island. No crossings.", bg=["50DCF5", "169CCC", "0A74A3"], bloom="FFFFFF", logo=["FFFFFF", "FFE9B0"]),
+    "number-path": dict(name="NUMBER PATH", tag="One line. Every square.", bg=["8E2463", "5C1447", "2A0822"], bloom="FF9AD0", logo=["FFFFFF", "FFD3EA"]),
 }
 
 
@@ -293,7 +303,179 @@ def art_2048(img):
     return img
 
 
-ART = {"block-puzzle": art_block, "color-sort": art_sort, "crown-logic": art_crown, "arrow-escape": art_arrow,
+def art_sunmoon(img):
+    box = [300, 300, 1748, 1748]
+    img = shadow(img, box, 140)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 140, fill=hx("2A2170"))
+    half = (box[2] - box[0]) / 2
+    d.line([box[0] + half, box[1] + 40, box[0] + half, box[3] - 40], fill=hx("5A4FC0"), width=14)
+    d.line([box[0] + 40, box[1] + half, box[2] - 40, box[1] + half], fill=hx("5A4FC0"), width=14)
+    for k, sun in enumerate([True, False, False, True]):
+        cx, cy = box[0] + half * (k % 2 + 0.5), box[1] + half * (k // 2 + 0.5)
+        if sun:
+            d.ellipse([cx - 250, cy - 250, cx + 250, cy + 250], fill=hx("FFC533"))
+            d.ellipse([cx - 190, cy - 190, cx + 190, cy + 190], fill=hx("FFF1A8"))
+            d.ellipse([cx - 150, cy - 130, cx + 150, cy + 170], fill=hx("FFB81E"))
+        else:
+            d.ellipse([cx - 230, cy - 230, cx + 230, cy + 230], fill=hx("C9D8FF"))
+            d.ellipse([cx - 100, cy - 270, cx + 290, cy + 120], fill=hx("2A2170"))
+    return img
+
+
+def art_path(img):
+    box = [300, 300, 1748, 1748]
+    img = shadow(img, box, 140)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 140, fill=hx("4A1638"))
+    cell = (box[2] - box[0] - 160) / 3
+    pt = lambda i: (box[0] + 80 + (i % 3 + 0.5) * cell, box[1] + 80 + (i // 3 + 0.5) * cell)
+    route = [0, 1, 2, 5, 4, 3, 6, 7, 8]
+    d.line([pt(i) for i in route], fill=hx("FFC233"), width=150, joint="curve")
+    for i in (route[0], route[-1]):
+        x, y = pt(i)
+        d.ellipse([x - 75, y - 75, x + 75, y + 75], fill=hx("FFC233"))
+    f = ImageFont.truetype(LILITA, 200)
+    for i, txt in ((0, "1"), (4, "2"), (8, "3")):
+        x, y = pt(i)
+        d.ellipse([x - 150, y - 150, x + 150, y + 150], fill=hx("FFFFFF"))
+        text_c(d, (x, y + 8), txt, f, hx("1C0714"))
+    return img
+
+def _panel(img, fill):
+    box = [300, 300, 1748, 1748]
+    img = shadow(img, box, 140)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 140, fill=hx(fill))
+    return img, d, box
+
+
+def art_nonogram(img):
+    img, d, box = _panel(img, "0A3238")
+    pic = [".X.X.", "XXXXX", "XXXXX", ".XXX.", "..X.."]
+    cell = (box[2] - box[0] - 160) / 5
+    for r, row in enumerate(pic):
+        for c, ch in enumerate(row):
+            x, y = box[0] + 80 + c * cell, box[1] + 80 + r * cell
+            if ch == "X":
+                gem(d, [x + 14, y + 14, x + cell - 14, y + cell - 14], "FF8AA8", "E2365F", 50)
+            else:
+                d.rounded_rectangle([x + 14, y + 14, x + cell - 14, y + cell - 14], 50, fill=hx("0D4A52"))
+    return img
+
+
+def art_rectangles(img):
+    img, d, box = _panel(img, "FFF7E8")
+    u = (box[2] - box[0] - 160) / 4
+    f = ImageFont.truetype(LILITA, 230)
+    for (r, c, h, w, col, n) in [(0, 0, 2, 2, "FF9F6B", "4"), (0, 2, 1, 2, "4FD1C0", "2"), (1, 2, 3, 2, "8FA7FF", "6"), (2, 0, 2, 2, "FFCF4A", "4")]:
+        x0, y0 = box[0] + 80 + c * u, box[1] + 80 + r * u
+        d.rounded_rectangle([x0 + 18, y0 + 18, x0 + w * u - 18, y0 + h * u - 18], 70, fill=hx(col))
+        cx, cy = x0 + w * u / 2, y0 + h * u / 2
+        d.ellipse([cx - 135, cy - 135, cx + 135, cy + 135], fill=(255, 255, 255))
+        text_c(d, (cx, cy + 8), n, f, hx("5A2E05"))
+    return img
+
+
+def art_match(img):
+    img, d, box = _panel(img, "FFFFFF")
+    u = (box[2] - box[0] - 160) / 2
+    f = ImageFont.truetype(LILITA, 420)
+    for k, (n, pick) in enumerate([("3", True), ("5", False), ("8", False), ("7", True)]):
+        x0, y0 = box[0] + 80 + (k % 2) * u, box[1] + 80 + (k // 2) * u
+        if pick:
+            gem(d, [x0 + 24, y0 + 24, x0 + u - 24, y0 + u - 24], "FFD27A", "FF9F1C", 110)
+        else:
+            d.rounded_rectangle([x0 + 24, y0 + 24, x0 + u - 24, y0 + u - 24], 110, fill=hx("E4ECFF"))
+        text_c(d, (x0 + u / 2, y0 + u / 2 + 14), n, f, hx("5A3000" if pick else "14265E"))
+    return img
+
+
+def art_crypto(img):
+    img, d, box = _panel(img, "F7EED6")
+    f = ImageFont.truetype(LILITA, 520)
+    fn = ImageFont.truetype(LILITA, 200)
+    u = (box[2] - box[0] - 200) / 2
+    for k, (ch, n) in enumerate([("A", "7"), ("", "3")]):
+        x0 = box[0] + 100 + k * u
+        d.rounded_rectangle([x0 + 30, box[1] + 150, x0 + u - 30, box[1] + 950], 90, fill=hx("C9A85E"))
+        d.rounded_rectangle([x0 + 30, box[1] + 150, x0 + u - 30, box[1] + 900], 90, fill=hx("FFE58A" if not ch else "FFFAF0"))
+        if ch:
+            text_c(d, (x0 + u / 2, box[1] + 540), ch, f, hx("133D2C"))
+        text_c(d, (x0 + u / 2, box[1] + 1140), n, fn, hx("7A5A1C"))
+    return img
+
+
+def art_five(img):
+    img, d, box = _panel(img, "161C2A")
+    f = ImageFont.truetype(LILITA, 330)
+    u = (box[2] - box[0] - 160) / 3
+    cols = {"g": ("43E0B8", "14A580"), "y": ("FFCF5C", "F09A12"), "n": ("4A566E", "3A4458")}
+    for r, (word, marks) in enumerate([("TRY", "gny"), ("ONE", "ngn"), ("WIN", "ggg")]):
+        for c in range(3):
+            x0, y0 = box[0] + 80 + c * u, box[1] + 80 + r * u
+            top, base = cols[marks[c]]
+            gem(d, [x0 + 20, y0 + 20, x0 + u - 20, y0 + u - 20], top, base, 70)
+            text_c(d, (x0 + u / 2, y0 + u / 2 + 10), word[c], f, (255, 255, 255))
+    return img
+
+
+def art_groups(img):
+    img, d, box = _panel(img, "FFFFFF")
+    u = (box[2] - box[0] - 160) / 4
+    bars = [("FFD27A", "F5A524"), ("9BE8A8", "3CBF6A"), ("9CC8FF", "4A8DF0"), ("FFA8C8", "EF5D94")]
+    for r in range(4):
+        y0 = box[1] + 80 + r * u
+        if r < 2:
+            gem(d, [box[0] + 100, y0 + 18, box[2] - 100, y0 + u - 18], bars[r][0], bars[r][1], 70)
+        else:
+            for c in range(4):
+                x0 = box[0] + 80 + c * u
+                pick = (r, c) in ((2, 1), (2, 2), (3, 0), (3, 2))
+                if pick:
+                    gem(d, [x0 + 18, y0 + 18, x0 + u - 18, y0 + u - 18], "8F5CFF", "5A28C8", 60)
+                else:
+                    d.rounded_rectangle([x0 + 18, y0 + 18, x0 + u - 18, y0 + u - 18], 60, fill=hx("E6DAFB"))
+    return img
+
+
+def art_domino(img):
+    box = [520, 260, 1528, 1788]
+    img = shadow(img, box, 150)
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle(box, 150, fill=hx("D8C6AC"))
+    d.rounded_rectangle([box[0], box[1], box[2], box[3] - 50], 150, fill=hx("FFFFFF"))
+    mid = (box[1] + box[3]) // 2
+    d.line([box[0] + 130, mid, box[2] - 130, mid], fill=hx("C8B49A"), width=22)
+    def pips(cy, pts):
+        for px, py in pts:
+            x, y = box[0] + 1008 * px, cy + 600 * (py - 0.5)
+            d.ellipse([x - 78, y - 78, x + 78, y + 78], fill=hx("2A0E02"))
+    pips(box[1] + 390, [(.28, .2), (.72, .2), (.5, .5), (.28, .8), (.72, .8)])
+    pips(box[3] - 410, [(.28, .2), (.5, .5), (.72, .8)])
+    return img
+
+
+def art_bridges(img):
+    img, d, box = _panel(img, "5CC4E0")
+    pt = lambda r, c: (box[0] + 290 + c * 868, box[1] + 290 + r * 868)
+    for a, b, k in [((0, 0), (0, 1), 2), ((0, 0), (1, 0), 1), ((0, 1), (1, 1), 1)]:
+        (x1, y1), (x2, y2) = pt(*a), pt(*b)
+        for off in ([0] if k == 1 else [-70, 70]):
+            dx, dy = (0, off) if y1 == y2 else (off, 0)
+            d.line([x1 + dx, y1 + dy, x2 + dx, y2 + dy], fill=hx("8A5A2B"), width=80)
+    f = ImageFont.truetype(LILITA, 300)
+    for (r, c), n, done in [((0, 0), "3", True), ((0, 1), "3", True), ((1, 0), "2", False), ((1, 1), "1", True)]:
+        x, y = pt(r, c)
+        d.ellipse([x - 230, y - 230, x + 230, y + 230], fill=(255, 255, 255))
+        d.ellipse([x - 195, y - 195, x + 195, y + 195], fill=hx("3CCB7F" if done else "F2C46A"))
+        text_c(d, (x, y + 10), n, f, hx("0D3A1A" if done else "5A3300"))
+    return img
+
+
+ART = {"nonogram": art_nonogram, "rectangles": art_rectangles, "number-match": art_match, "cryptogram": art_crypto, "five-letters": art_five,
+       "word-groups": art_groups, "domino-logic": art_domino, "bridges": art_bridges,
+       "sun-moon": art_sunmoon, "number-path": art_path, "block-puzzle": art_block, "color-sort": art_sort, "crown-logic": art_crown, "arrow-escape": art_arrow,
        "tile-mahjong": art_mahjong, "sudoku": art_sudoku, "word-search": art_word, "solitaire": art_solitaire,
        "car-escape": art_car, "merge-2048": art_2048}
 
@@ -348,6 +530,8 @@ def build(mod):
     d = ImageDraw.Draw(fgx)
     words = g["name"].split(" ")
     size = 120 if max(len(w) for w in words) <= 6 else 96
+    while max(ImageFont.truetype(LILITA, size).getlength(w) for w in words) > W - 500 - 40:  # long one-word names
+        size -= 4
     f = ImageFont.truetype(LILITA, size)
     ts = 34
     while ImageFont.truetype(LILITA, ts).getlength(g["tag"]) > W - 500 - 50:  # keep tagline inside the right half
