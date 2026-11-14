@@ -8,7 +8,7 @@ Already built, not repeated here: Block Grid Puzzle, Color Sort, Crown Logic, Ar
 
 Tick a batch when all 10 games are built.
 
-- [ ] Batch 1 (games 11 to 20, in progress: Sun & Moon and Number Path built): daily logic and word dailies
+- [x] Batch 1 (games 11 to 20): daily logic and word dailies. Built, not yet run on a phone
 - [ ] Batch 2 (games 21 to 30): board and card classics against the computer
 - [ ] Batch 3 (games 31 to 40): word, trivia and brain
 - [ ] Batch 4 (games 41 to 50): relaxing puzzles

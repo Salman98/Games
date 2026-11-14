@@ -1,6 +1,6 @@
 # Games
 
-12 Android puzzle games in one repo, sharing **one `gradlew`** and one `core` module.
+20 Android puzzle games in one repo, sharing **one `gradlew`** and one `core` module.
 Kotlin + Jetpack Compose, AdMob ads (banner, rewarded, interstitial).
 
 | Module | Game | Rewarded ad gives |
@@ -17,6 +17,14 @@ Kotlin + Jetpack Compose, AdMob ads (banner, rewarded, interstitial).
 | `merge-2048` | 2048 Merge | Undo |
 | `sun-moon` | Sun & Moon (equal suns and moons per line, never three in a row) | Fills a cell |
 | `number-path` | Number Path (one line through every square, numbers in order) | Draws the next 3 squares |
+| `nonogram` | Nonogram (number clues reveal a pixel picture) | Fixes or fills one square |
+| `rectangles` | Rectangles (cut the grid; each rectangle holds one number, its size) | Draws one rectangle |
+| `number-match` | Number Match (cross out equal pairs and pairs that make 10) | Shows a pair |
+| `cryptogram` | Cryptogram (decode a public-domain saying; numbers stand for letters) | Reveals a letter |
+| `five-letters` | Five Letters (guess the hidden word in 6 tries) | Shows one letter |
+| `word-groups` | Word Groups (sort 16 words into 4 hidden groups) | Reveals a group |
+| `domino-logic` | Domino Logic (place dominoes so each coloured region's rule holds) | Places a domino |
+| `bridges` | Bridges (join numbered islands with 1 or 2 bridges, no crossings) | Fixes one bridge |
 
 ## Build
 
@@ -57,6 +65,14 @@ Uninstall: `adb uninstall com.techeliteclub.game.blockpuzzle`. Module names and 
 | `merge-2048` | `com.techeliteclub.game.merge2048` |
 | `sun-moon` | `com.techeliteclub.game.sunmoon` |
 | `number-path` | `com.techeliteclub.game.numberpath` |
+| `nonogram` | `com.techeliteclub.game.nonogram` |
+| `rectangles` | `com.techeliteclub.game.rectangles` |
+| `number-match` | `com.techeliteclub.game.numbermatch` |
+| `cryptogram` | `com.techeliteclub.game.cryptogram` |
+| `five-letters` | `com.techeliteclub.game.fiveletters` |
+| `word-groups` | `com.techeliteclub.game.wordgroups` |
+| `domino-logic` | `com.techeliteclub.game.dominologic` |
+| `bridges` | `com.techeliteclub.game.bridges` |
 
 ## Layout
 

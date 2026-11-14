@@ -181,6 +181,14 @@ val ALL_GAMES = listOf(
     GameInfo("2048", "com.techeliteclub.game.merge2048", "Swipe and merge", Themes.M2048),
     GameInfo("Sun & Moon", "com.techeliteclub.game.sunmoon", "Balance suns and moons", Themes.SunMoon),
     GameInfo("Number Path", "com.techeliteclub.game.numberpath", "One line, every square", Themes.Path),
+    GameInfo("Nonogram", "com.techeliteclub.game.nonogram", "Numbers reveal pictures", Themes.Nonogram),
+    GameInfo("Rectangles", "com.techeliteclub.game.rectangles", "Cut the grid to size", Themes.Rectangles),
+    GameInfo("Number Match", "com.techeliteclub.game.numbermatch", "Pair equals and tens", Themes.NumberMatch),
+    GameInfo("Cryptogram", "com.techeliteclub.game.cryptogram", "Crack the quote", Themes.Cryptogram),
+    GameInfo("Five Letters", "com.techeliteclub.game.fiveletters", "Guess the word in six", Themes.FiveLetters),
+    GameInfo("Word Groups", "com.techeliteclub.game.wordgroups", "Find four hidden groups", Themes.WordGroups),
+    GameInfo("Domino Logic", "com.techeliteclub.game.dominologic", "Dominoes meet the rules", Themes.Domino),
+    GameInfo("Bridges", "com.techeliteclub.game.bridges", "Link every island", Themes.Bridges),
 )
 
 fun isInstalled(context: Context, pkg: String) = context.packageManager.getLaunchIntentForPackage(pkg) != null

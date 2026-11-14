@@ -18,6 +18,14 @@ Tick boxes as you go (GitHub shows them as checkboxes). Do the sections in order
 | 10 | 2048 Merge | `merge-2048` | `com.techeliteclub.game.merge2048` |
 | 11 | Sun & Moon Logic | `sun-moon` | `com.techeliteclub.game.sunmoon` |
 | 12 | Number Path | `number-path` | `com.techeliteclub.game.numberpath` |
+| 13 | Nonogram | `nonogram` | `com.techeliteclub.game.nonogram` |
+| 14 | Rectangles | `rectangles` | `com.techeliteclub.game.rectangles` |
+| 15 | Number Match | `number-match` | `com.techeliteclub.game.numbermatch` |
+| 16 | Cryptogram | `cryptogram` | `com.techeliteclub.game.cryptogram` |
+| 17 | Five Letters | `five-letters` | `com.techeliteclub.game.fiveletters` |
+| 18 | Word Groups | `word-groups` | `com.techeliteclub.game.wordgroups` |
+| 19 | Domino Logic | `domino-logic` | `com.techeliteclub.game.dominologic` |
+| 20 | Bridges | `bridges` | `com.techeliteclub.game.bridges` |
 
 Package names can never change after the first upload.
 

@@ -32,4 +32,12 @@ include(
     ":merge-2048",
     ":sun-moon",
     ":number-path",
+    ":nonogram",
+    ":rectangles",
+    ":number-match",
+    ":cryptogram",
+    ":five-letters",
+    ":word-groups",
+    ":domino-logic",
+    ":bridges",
 )
